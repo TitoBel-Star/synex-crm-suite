@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      alert("❌ JS Error: " + message + "\nFile: " + source + "\nLine: " + lineno + "\nCol: " + colno);
+      return false;
+    };
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synex Cloud CRM - Módulo Enterprise ERP/CRM</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/styles/index.css">
+</head>
+<body class="dark-theme">
+  <div id="app" class="app-container">
+    <!-- Top Executive Header Bar -->
+    <header class="top-header">
+      <div class="brand-logo">
+        <div class="logo-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="logo-text">
+          <h2>Synex <span>Cloud CRM</span></h2>
+          <span class="sub-badge"><i class="fa-solid fa-cloud"></i> Meta Cloud API v19.0</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="inbox">
+          <i class="fa-solid fa-comments"></i> Bandeja Multiagente
+          <span class="badge" id="badge-inbox-count">2</span>
+        </button>
+        <button class="nav-btn" data-tab="funnel">
+          <i class="fa-solid fa-filter-circle-dollar"></i> Embudo de Ventas
+        </button>
+        <button class="nav-btn" data-tab="erp">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Consola ERP
+        </button>
+        <button class="nav-btn" data-tab="rules">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Motor de Reglas
+        </button>
+        <button class="nav-btn" data-tab="analytics">
+          <i class="fa-solid fa-chart-line"></i> Dashboard Ejecutivo
+        </button>
+        <button class="nav-btn" data-tab="process-mining">
+          <i class="fa-solid fa-diagram-project"></i> Minería de Procesos
+        </button>
+        <button class="nav-btn" data-tab="settings">
+          <i class="fa-solid fa-gears"></i> Configuración Meta
+        </button>
+        <button class="nav-btn" data-tab="help">
+          <i class="fa-solid fa-book-open"></i> Manual de Usuario
+        </button>
+        <button class="nav-btn" data-tab="simulacro" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #d8b4fe;">
+          <i class="fa-solid fa-play"></i> Guía de Simulacro
+        </button>
+      </nav>
+
+      <div class="user-profile">
+        <button id="btn-qr-modal-open" class="btn btn-outline" style="gap: 0.4rem; padding: 0.35rem 0.75rem; font-size: 0.8rem; border-color: #25D366; color: #25D366; font-weight: 600; margin-right: 0.75rem;">
+          <i class="fa-solid fa-qrcode"></i> Conectar WhatsApp QR
+        </button>
+        <div class="status-indicator online"></div>
+        <div class="user-info">
+          <span class="user-name">Carlos Mendoza</span>
+          <span class="user-role">Administrador CRM</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Content Views -->
+    <main class="main-content">
+      <!-- 1. BANDEJA MULTIAGENTE -->
+      <section id="view-inbox" class="tab-view active">
+        <div class="inbox-layout">
+          <!-- Sidebar Conversation List -->
+          <aside class="conversations-sidebar">
+            <div class="sidebar-header">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="chat-search-input" placeholder="Buscar cliente, teléfono o tag...">
+              </div>
+              <div class="filter-pills">
+                <button class="pill active" data-status="ALL">Todos</button>
+                <button class="pill" data-status="IN_PROGRESS">En Proceso</button>
+                <button class="pill" data-status="AI_BOT">IA Bot</button>
+              </div>
+            </div>
+
+            <div class="conversations-list" id="conversations-list-container">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </aside>
+
+          <!-- Chat Detail & Messages Window -->
+          <section class="chat-viewport">
+            <header class="chat-header" id="active-chat-header">
+              <div class="chat-customer-info">
+                <div class="avatar-circle" id="chat-avatar">DL</div>
+                <div>
+                  <h3 id="chat-customer-name">Distribuidora Los Laureles</h3>
+                  <p id="chat-customer-details"><i class="fa-solid fa-phone"></i> +50670112233 | <span class="tag-badge">Cliente VIP</span></p>
+                </div>
+              </div>
+              <div class="chat-actions">
+                <button class="btn btn-outline" id="btn-open-erp-modal"><i class="fa-solid fa-cart-plus"></i> Crear Cotización / Pedido</button>
+                <button class="btn btn-outline" id="btn-transfer-chat"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transferir Chat</button>
+                <span class="badge priority-high" id="chat-priority">Prioridad Alta</span>
+              </div>
+            </header>
+
+            <div class="messages-container" id="messages-container">
+              <!-- Messages Rendered Dynamic -->
+            </div>
+
+            <!-- Chat Input Area -->
+            <footer class="chat-input-area">
+              <div class="input-actions-bar">
+                <button class="tool-btn" id="btn-add-note" title="Agregar Nota Interna Auditora"><i class="fa-solid fa-sticky-note"></i> Nota Interna</button>
+                <button class="tool-btn" id="btn-quick-catalog" title="Adjuntar Catálogo de Inventario ERP"><i class="fa-solid fa-boxes-stacked"></i> Catalogo ERP</button>
+                <button class="tool-btn" id="btn-quick-invoice" title="Buscar y enviar Factura PDF"><i class="fa-solid fa-file-pdf"></i> Factura PDF</button>
+              </div>
+              <div class="input-row">
+                <textarea id="message-text-input" placeholder="Escribe un mensaje de WhatsApp o selecciona una plantilla..." rows="2"></textarea>
+                <button id="btn-send-message" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+              </div>
+            </footer>
+          </section>
+
+          <!-- Right Customer & ERP Context Panel -->
+          <aside class="context-sidebar">
+            <div class="context-card">
+              <h4><i class="fa-solid fa-user-gear"></i> Expediente CRM</h4>
+              <div class="info-row"><span>Cliente:</span> <strong id="ctx-cust-name">Distribuidora Los Laureles</strong></div>
+              <div class="info-row"><span>Cédula Jurídica:</span> <strong id="ctx-cust-tax">3-101-778899</strong></div>
+              <div class="info-row"><span>Tipo:</span> <span class="badge badge-success" id="ctx-cust-type">CLIENTE REGISTRADO</span></div>
+              <div class="info-row"><span>Asesor Asignado:</span> <strong id="ctx-cust-rep">Carlos Mendoza</strong></div>
+              <button class="btn btn-outline" id="btn-open-customer-modal" style="width: 100%; margin-top: 0.75rem; font-size: 0.78rem; padding: 0.45rem; justify-content: center; background: rgba(56, 189, 248, 0.1); border-color: #38bdf8; color: #38bdf8; font-weight: 600;">
+                <i class="fa-solid fa-user-plus"></i> Registrar / Editar Cliente CRM
+              </button>
+            </div>
+
+            <div class="context-card glow-card">
+              <h4><i class="fa-solid fa-wallet"></i> Estado Financiero ERP</h4>
+              <div class="info-row"><span>Línea Crédito:</span> <strong id="ctx-credit-limit">$50,000.00</strong></div>
+              <div class="info-row"><span>Saldo Pendiente:</span> <strong class="text-warning" id="ctx-current-balance">$12,450.00</strong></div>
+              <div class="info-row"><span>Crédito Disponible:</span> <strong class="text-success" id="ctx-available-credit">$37,550.00</strong></div>
+              <div class="credit-bar-container">
+                <div class="credit-bar-fill" style="width: 25%;"></div>
+              </div>
+            </div>
+
+            <div class="context-card">
+              <h4><i class="fa-solid fa-clock-rotate-left"></i> Historial Reciente ERP</h4>
+              <div id="ctx-recent-docs">
+                <div class="doc-history-item">
+                  <div class="doc-title">Cotización COT-2026-0044</div>
+                  <div class="doc-amount">$745.80 • <span class="text-success">Aprobada</span></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 2. EMBUDO DE VENTAS KANBAN -->
+      <section id="view-funnel" class="tab-view">
+        <div class="funnel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2><i class="fa-solid fa-filter-circle-dollar"></i> Embudo de Ventas Empresarial</h2>
+            <p>Gestión visual de tratos por etapas configurables desde el primer mensaje de WhatsApp</p>
+          </div>
+          <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(30,41,59,0.4); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+            <label style="font-size: 0.85rem; color: #94a3b8; font-weight: 500; margin-right: 0.25rem;"><i class="fa-solid fa-user-tie"></i> Filtrar por Vendedor:</label>
+            <select id="funnel-rep-filter" style="background: #0f172a; color: #38bdf8; border: 1px solid #38bdf8; border-radius: 6px; padding: 5px 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; outline: none;">
+              <option value="ALL">👤 Todos los Vendedores</option>
+              <option value="Carlos Mendoza">Carlos Mendoza</option>
+              <option value="Ana Gutiérrez">Ana Gutiérrez</option>
+              <option value="Roberto Gómez">Roberto Gómez</option>
+            </select>
+          </div>
+        </div>
+        <div class="kanban-board" id="kanban-board-container">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+
+      <!-- 3. CONSOLA ERP & CATALOGO -->
+      <section id="view-erp" class="tab-view">
+        <div class="erp-container">
+          <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2><i class="fa-solid fa-boxes-stacked"></i> Catálogo de Productos e Inventario ERP</h2>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <input type="text" id="erp-inventory-search-input" placeholder="🔍 Escribe SKU o código de producto..." style="padding: 0.5rem 0.85rem; border-radius: 6px; background: #0f172a; border: 1px solid #38bdf8; color: #f8fafc; font-size: 0.85rem; width: 280px; font-weight: 500;">
+              <button class="btn btn-primary" id="btn-new-erp-doc"><i class="fa-solid fa-plus"></i> Nueva Cotización / Pedido</button>
+            </div>
+          </div>
+          <div class="inventory-grid" id="inventory-grid-container">
+            <!-- Products rendered here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MOTOR DE REGLAS NO-CODE -->
+      <section id="view-rules" class="tab-view">
+        <div class="rules-container">
+          <div class="section-title">
+            <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Motor de Automatización No-Code</h2>
+            <button class="btn btn-primary" id="btn-create-rule"><i class="fa-solid fa-plus"></i> Nueva Regla de Respuesta</button>
+          </div>
+
+          <div class="rules-list" id="rules-list-container">
+            <!-- Rules rendered dynamic -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DASHBOARD EJECUTIVO ANALYTICS -->
+      <section id="view-analytics" class="tab-view">
+        <div class="analytics-dashboard">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="fa-brands fa-whatsapp"></i></div>
+              <div class="kpi-info">
+                <h3>Mensajes Procesados</h3>
+                <h2 id="kpi-total-messages">1,482</h2>
+                <span class="kpi-trend positive"><i class="fa-solid fa-arrow-up"></i> +18% este mes</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon icon-cyan"><i class="fa-solid fa-users"></i></div>
+              <div class="kpi-info">
+                <h3>Leads Generados WA</h3>
+                <h2 id="kpi-leads">342</h2>
+                <span class="kpi-sub">Auto-registrados en CRM</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon icon-emerald"><i class="fa-solid fa-sack-dollar"></i></div>
+              <div class="kpi-info">
+                <h3>Ventas Originadas WA</h3>
+                <h2 id="kpi-sales">$48,250.00</h2>
+                <span class="kpi-trend positive"><i class="fa-solid fa-arrow-up"></i> Tasa conversión 34.8%</span>
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon icon-purple"><i class="fa-solid fa-bolt"></i></div>
+              <div class="kpi-info">
+                <h3>Tiempo Resp. Promedio</h3>
+                <h2>1.4 min</h2>
+                <span class="kpi-sub">SLA empresarial alcanzado</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-row">
+            <div class="chart-card">
+              <h3>Rendimiento por Asesor / Vendedor</h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Asesor</th>
+                    <th>Estado</th>
+                    <th>Chats Activos</th>
+                    <th>Tiempo Resp.</th>
+                    <th>Ventas Creadas</th>
+                  </tr>
+                </thead>
+                <tbody id="rep-performance-tbody">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="chart-card">
+              <h3>Distribución de Conversaciones por Etapa</h3>
+              <div class="distribution-bars" id="funnel-distribution-container">
+                <!-- Bars rendered JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. CONFIGURACIÓN META & AUDITORÍA -->
+      <section id="view-settings" class="tab-view">
+        <div class="settings-container">
+          <div class="settings-card">
+            <h3><i class="fa-brands fa-meta" style="color: #0084FF;"></i> Credenciales Meta WhatsApp Cloud API (Producción)</h3>
+            <form id="config-form" class="config-form" onsubmit="event.preventDefault();">
+              <div class="form-group">
+                <label>WhatsApp Business Phone Number ID</label>
+                <input type="text" id="meta-input-phone-id" placeholder="Ej. 1156403020898605" value="1156403020898605">
+              </div>
+              <div class="form-group">
+                <label>Meta Permanent User Access Token (Bearer Token)</label>
+                <input type="password" id="meta-input-token" placeholder="EAAG... Token largo de Meta Developers" value="EAAG_META_PERMANENT_ACCESS_TOKEN_2026">
+              </div>
+              <div class="form-group">
+                <label>Webhook Verify Token</label>
+                <input type="text" id="meta-input-verify" value="antigravity_webhook_secret_2026">
+              </div>
+              <div class="form-group">
+                <label>Webhook Callback URL (Para copiar en Meta Developers)</label>
+                <input type="text" value="https://api.comercialglobal.com/api/v1/webhooks/whatsapp" readonly style="background: rgba(255,255,255,0.05); color: #38bdf8;">
+              </div>
+              <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                <button type="button" id="btn-save-meta-config" class="btn btn-primary" style="background: var(--wa-green); color: #000; font-weight: 700;"><i class="fa-solid fa-floppy-disk"></i> Guardar Llaves Meta</button>
+                <button type="button" id="btn-test-meta-config" class="btn btn-outline"><i class="fa-solid fa-paper-plane"></i> Probar Conexión con Celular Real</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fa-solid fa-list-check"></i> Bitácora de Auditoría y Logs</h3>
+            <div class="audit-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Recurso</th>
+                    <th>Detalles</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-tbody">
+                  <!-- Audit logs rendered JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. MANUAL DE USUARIO EN LA NUBE -->
+      <section id="view-help" class="tab-view">
+        <div style="max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; color: #f8fafc; line-height: 1.7;">
+          <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px); border-radius: 1rem; padding: 2.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+              <div style="width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(135deg, #06b6d4, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: white;">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+              <div>
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; margin: 0; color: #ffffff;">Manual de Usuario - Antigravity WA-ERP Suite</h2>
+                <p style="margin: 0.25rem 0 0 0; color: #94a3b8;">Guía oficial de uso para el panel en la nube de WhatsApp Business Cloud API & ERP/CRM Integration</p>
+              </div>
+            </div>
+
+            <!-- Manual content grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+              
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #38bdf8; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-comments"></i> 1. Bandeja Multiagente
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li><strong>Filtros por Estado:</strong> Alterna entre <code>Todos</code>, <code>En Proceso</code> (asesor humano) e <code>IA Bot</code> (respuestas automáticas).</li>
+                  <li><strong>Buscador:</strong> Escribe nombre, teléfono o tag en la barra superior.</li>
+                  <li><strong>Acciones Rápidas:</strong> Usa los botones 📝 <em>Nota Interna</em>, 📦 <em>Catálogo ERP</em> y 🧾 <em>Factura PDF</em>.</li>
+                  <li><strong>Transferencia:</strong> Reasigna la conversación usando el botón <code>Transferir Chat</code>.</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #34d399; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-filter-circle-dollar"></i> 2. Embudo CRM Kanban
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li>Visualiza el estado de tus tratos desde el primer contacto en WhatsApp.</li>
+                  <li><strong>Etapas Especiales de Despacho:</strong>
+                    <ul>
+                      <li><code>Factura y Despacho en Sucursal</code>: Para retiros presenciales en caja.</li>
+                      <li><code>Factura y Despacho a Domicilio</code>: Captura la distancia en Kilómetros (KM), chofer asignado y tiempo estimado de llegada (ETA) enviando actualización automática por WhatsApp.</li>
+                    </ul>
+                  </li>
+                  <li>Muestra el valor estimado ($) y datos del cliente en cada tarjeta con selector directo.</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #fbbf24; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-file-invoice-dollar"></i> 3. Consola ERP y Ventas
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li><strong>Emisión de Documentos:</strong> Haz clic en <code>Crear Cotización / Pedido</code>.</li>
+                  <li>Selecciona entre Cotización (COT), Pedido (PED) o Factura (FAC).</li>
+                  <li>Agrega productos del inventario y el sistema calculará subtotal, IVA 13% y total.</li>
+                  <li>Al emitir, se envía automáticamente el enlace PDF al WhatsApp del cliente.</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #a78bfa; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> 4. Motor de Reglas No-Code
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li>Detecta palabras clave en mensajes entrantes (ej. <code>PRECIO</code>, <code>FACTURA</code>).</li>
+                  <li>Ejecuta respuestas automáticas conectadas directamente con el stock o facturación ERP.</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #f472b6; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-chart-line"></i> 5. Dashboard Ejecutivo
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li>Métricas en tiempo real: Mensajes totales, Leads WA, Ventas originadas y SLA de respuesta.</li>
+                  <li>Tabla de rendimiento por vendedor con estado online y monto de ventas creadas.</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1.5rem;">
+                <h3 style="color: #60a5fa; font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fa-solid fa-gears"></i> 6. Meta Cloud & Auditoría
+                </h3>
+                <ul style="padding-left: 1.2rem; margin: 0; color: #cbd5e1;">
+                  <li>Verificación de tokens y webhooks de Meta WhatsApp Cloud API v19.0.</li>
+                  <li>Bitácora de Auditoría inalterable que registra todas las operaciones por fecha, usuario y recurso.</li>
+                </ul>
+              </div>
+
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; color: #64748b; font-size: 0.9rem;">
+              📄 El documento fuente en Markdown se encuentra guardado en el proyecto como <code>MANUAL_DE_USUARIO.md</code>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. GUÍA DE SIMULACRO INTERACTIVO -->
+      <section id="view-simulacro" class="tab-view">
+        <div class="card-glass" style="max-width: 1100px; margin: 0 auto; padding: 2rem; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;">
+            <div>
+              <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; color: #f8fafc; margin-bottom: 0.2rem;"><i class="fa-solid fa-play" style="color: #a855f7;"></i> Simulacro de Ciclo Comercial Completo</h2>
+              <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Ejecuta y demuestra la potencia de Synex CRM paso a paso de forma guiada.</p>
+            </div>
+            <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe; font-size: 0.85rem; padding: 0.4rem 0.8rem; border: 1px solid rgba(168, 85, 247, 0.4);"><i class="fa-solid fa-circle-play"></i> Modo Simulación</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem;">
+            <!-- Left Panel: Steps -->
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              
+              <!-- Step 1 -->
+              <div class="sim-step-card" style="padding: 1.25rem; border-radius: 8px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;">1</div>
+                <div style="flex: 1;">
+                  <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.3rem;">Captación del Lead y Conversación (Bandeja Multiagente)</h4>
+                  <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.8rem;">Muestra a tu cliente la recepción de mensajes de WhatsApp. El bot de IA responderá automáticamente sobre inventarios o puedes enviar un mensaje manual.</p>
+                  <button class="btn btn-primary btn-sm" onclick="runSimStep(1)" style="background: #38bdf8; color: #000; font-weight: 600;"><i class="fa-solid fa-eye"></i> Autoejecutar: Ir a Bandeja de Entrada</button>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="sim-step-card" style="padding: 1.25rem; border-radius: 8px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;">2</div>
+                <div style="flex: 1;">
+                  <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.3rem;">Registro del Expediente Comercial (Expediente CRM)</h4>
+                  <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.8rem;">Demuestra cómo actualizar la ficha del cliente, su cédula jurídica, línea de crédito y tipo de cliente en vivo.</p>
+                  <button class="btn btn-primary btn-sm" onclick="runSimStep(2)" style="background: #38bdf8; color: #000; font-weight: 600;"><i class="fa-solid fa-user-pen"></i> Autoejecutar: Abrir Ficha de Cliente</button>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="sim-step-card" style="padding: 1.25rem; border-radius: 8px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;">3</div>
+                <div style="flex: 1;">
+                  <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.3rem;">Embudo de Ventas Kanban</h4>
+                  <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.8rem;">Arrastra y mueve oportunidades a través de las 11 etapas de venta comerciales en un panel visual e intuitivo.</p>
+                  <button class="btn btn-primary btn-sm" onclick="runSimStep(3)" style="background: #38bdf8; color: #000; font-weight: 600;"><i class="fa-solid fa-arrows-spin"></i> Autoejecutar: Ir a Embudo Kanban</button>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="sim-step-card" style="padding: 1.25rem; border-radius: 8px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;">4</div>
+                <div style="flex: 1;">
+                  <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.3rem;">Facturación y Asiento Contable (Enlace ERP)</h4>
+                  <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.8rem;">Crea un documento de venta (Cotización, Pedido o Factura) agregando productos. Al guardar, el ERP genera automáticamente el asiento contable de débito/crédito.</p>
+                  <button class="btn btn-primary btn-sm" onclick="runSimStep(4)" style="background: #38bdf8; color: #000; font-weight: 600;"><i class="fa-solid fa-receipt"></i> Autoejecutar: Abrir Facturador ERP</button>
+                </div>
+              </div>
+
+              <!-- Step 5 -->
+              <div class="sim-step-card" style="padding: 1.25rem; border-radius: 8px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;">5</div>
+                <div style="flex: 1;">
+                  <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.3rem;">Minería de Procesos y Conformance Checking</h4>
+                  <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 0.8rem;">Descubre el mapa de procesos real a partir del log de auditoría. Filtra los casos que cometieron desviaciones críticas en un solo clic.</p>
+                  <button class="btn btn-primary btn-sm" onclick="runSimStep(5)" style="background: #38bdf8; color: #000; font-weight: 600;"><i class="fa-solid fa-network-wired"></i> Autoejecutar: Ir a Minería de Procesos</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right Panel: Info & Quick Action -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div style="padding: 1.5rem; border-radius: 10px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2);">
+                <h4 style="font-family: 'Outfit', sans-serif; color: #d8b4fe; font-size: 1.1rem; margin-bottom: 0.8rem;"><i class="fa-solid fa-lightbulb"></i> Consejos para Demostración Comercial</h4>
+                <ul style="color: #cbd5e1; font-size: 0.85rem; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; line-height: 1.5;">
+                  <li><strong>Enfoque de Negocios</strong>: Enfatiza cómo la IA Bot y la sincronización con el ERP eliminan errores humanos y ahorran hasta un 80% de tiempo en digitación contable.</li>
+                  <li><strong>Toma de Decisiones</strong>: En la Minería de Procesos, muestra cómo el gerente puede saber al instante si su equipo está saltándose controles reglamentarios (desviaciones).</li>
+                  <li><strong>Escalabilidad</strong>: Explica que la base de datos se comunica en tiempo real con Meta Cloud API para enviar mensajes oficiales de WhatsApp Business.</li>
+                </ul>
+              </div>
+
+              <div style="padding: 1.5rem; border-radius: 10px; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                <h4 style="color: #f8fafc; font-size: 1rem; margin-bottom: 0.5rem;">💡 Ejecutar Todo al Instante</h4>
+                <p style="color: #94a3b8; font-size: 0.85rem; line-height: 1.4; margin-bottom: 1rem;">¿Quieres preparar la app con todos los datos precargados listos para ver el mapa de procesos en vivo?</p>
+                <button class="btn btn-primary" onclick="runSimStep(6)" style="background: var(--wa-green); color: #000; font-weight: 700; width: 100%;"><i class="fa-solid fa-bolt"></i> Cargar y Descubrir Proceso CRM</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. MINERÍA DE PROCESOS (PROCESS MINING) -->
+      <section id="view-process-mining" class="tab-view">
+        <div class="process-mining-layout">
+          <!-- Config Sidebar -->
+          <aside class="pm-sidebar">
+            <div class="pm-sidebar-card">
+              <h3><i class="fa-solid fa-gears"></i> Configuración del Minero</h3>
+              
+              <div class="form-group">
+                <label><i class="fa-solid fa-file-csv"></i> Registro de Eventos (CSV)</label>
+                <div class="file-upload-wrapper">
+                  <input type="file" id="pm-file-input" accept=".csv" class="hidden">
+                  <button class="btn btn-outline btn-full" id="btn-pm-file-trigger" style="width: 100%; display: flex; justify-content: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-upload"></i> Seleccionar CSV
+                  </button>
+                  <span id="pm-filename-lbl" class="file-name-display" style="display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ningún archivo seleccionado</span>
+                </div>
+                <button class="btn btn-secondary btn-full" id="btn-pm-load-sample" style="width: 100%; margin-top: 0.5rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; display: flex; justify-content: center; gap: 0.4rem;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Usar Dataset de Ejemplo CRM
+                </button>
+              </div>
+              
+              <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 1.25rem 0;">
+              
+              <div class="form-group">
+                <label>Columna Case ID</label>
+                <input type="text" id="pm-col-case" value="case_id" placeholder="case_id" style="width: 100%;">
+              </div>
+              
+              <div class="form-group">
+                <label>Columna Actividad</label>
+                <input type="text" id="pm-col-activity" value="activity" placeholder="activity" style="width: 100%;">
+              </div>
+              
+              <div class="form-group">
+                <label>Columna Timestamp</label>
+                <input type="text" id="pm-col-timestamp" value="timestamp" placeholder="timestamp" style="width: 100%;">
+              </div>
+
+              <div class="form-group">
+                <label>Columna Vendedor / Recurso</label>
+                <input type="text" id="pm-col-resource" value="resource" placeholder="resource" style="width: 100%;">
+              </div>
+
+              <div class="form-group">
+                <label>Filtrar por Vendedor</label>
+                <select id="pm-filter-resource" style="width: 100%; background: #0f172a; color: #38bdf8; border: 1px solid #38bdf8; border-radius: 6px; padding: 6px 10px; font-weight: 600; cursor: pointer; outline: none;">
+                  <option value="ALL">Todos los vendedores</option>
+                </select>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem; margin-bottom: 0.5rem;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                  <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Fecha Desde</label>
+                  <input type="date" id="pm-filter-start-date" style="width: 100%; background: #0f172a; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px; font-size: 0.8rem; outline: none; font-family: 'Inter', sans-serif;">
+                </div>
+                <div class="form-group" style="flex: 1; margin: 0;">
+                  <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Fecha Hasta</label>
+                  <input type="date" id="pm-filter-end-date" style="width: 100%; background: #0f172a; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px; font-size: 0.8rem; outline: none; font-family: 'Inter', sans-serif;">
+                </div>
+              </div>
+              
+              <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 1.25rem 0;">
+              
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                  <label>Umbral de Dependencia</label>
+                  <span id="lbl-pm-dep-threshold" class="val-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">0.50</span>
+                </div>
+                <input type="range" id="range-pm-dep-threshold" min="0" max="1" step="0.05" value="0.5" style="width: 100%;">
+              </div>
+              
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                  <label>Umbral Bucles L2</label>
+                  <span id="lbl-pm-loop-threshold" class="val-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">0.50</span>
+                </div>
+                <input type="range" id="range-pm-loop-threshold" min="0" max="1" step="0.05" value="0.5" style="width: 100%;">
+              </div>
+              
+              <button class="btn btn-primary btn-full" id="btn-pm-run" style="width: 100%; margin-top: 1.25rem; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; font-weight: 700; display: flex; justify-content: center; gap: 0.5rem; border: none; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);">
+                <i class="fa-solid fa-play"></i> Descubrir Proceso
+              </button>
+            </div>
+          </aside>
+          
+          <!-- Graph & Stats Main Area -->
+          <div class="pm-main-content">
+            <!-- Summary Stats Cards -->
+            <div class="pm-stats-grid">
+              <div class="pm-stat-card">
+                <div class="icon-circle" style="background: rgba(0, 242, 254, 0.1); color: #00f2fe;"><i class="fa-solid fa-folder-open"></i></div>
+                <div class="stat-info">
+                  <span class="stat-lbl">Casos Totales</span>
+                  <h3 id="pm-stat-cases">-</h3>
+                </div>
+              </div>
+              <div class="pm-stat-card">
+                <div class="icon-circle" style="background: rgba(79, 172, 254, 0.1); color: #4facfe;"><i class="fa-solid fa-hashtag"></i></div>
+                <div class="stat-info">
+                  <span class="stat-lbl">Eventos Totales</span>
+                  <h3 id="pm-stat-events">-</h3>
+                </div>
+              </div>
+              <div class="pm-stat-card">
+                <div class="icon-circle" style="background: rgba(52, 211, 153, 0.1); color: #34d399;"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+                <div class="stat-info">
+                  <span class="stat-lbl">Eventos por Caso</span>
+                  <h3 id="pm-stat-avg-events">-</h3>
+                </div>
+              </div>
+              <div class="pm-stat-card">
+                <div class="icon-circle" style="background: rgba(167, 139, 250, 0.1); color: #a78bfa;"><i class="fa-solid fa-cube"></i></div>
+                <div class="stat-info">
+                  <span class="stat-lbl">Actividades Únicas</span>
+                  <h3 id="pm-stat-activities">-</h3>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Graph Visualization Panel -->
+            <div class="pm-graph-panel">
+              <div class="panel-header">
+                <h3><i class="fa-solid fa-network-wired"></i> Mapa de Procesos (Heuristic Net)</h3>
+                <div class="panel-actions">
+                  <button class="btn btn-outline btn-sm" id="btn-pm-zoom-in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                  <button class="btn btn-outline btn-sm" id="btn-pm-zoom-out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                  <button class="btn btn-outline btn-sm" id="btn-pm-fit"><i class="fa-solid fa-compress"></i> Ajustar</button>
+                </div>
+              </div>
+              <div id="pm-canvas-container" class="pm-canvas">
+                <!-- Cytoscape will render here -->
+                <div class="pm-placeholder-message" id="pm-canvas-placeholder">
+                  <i class="fa-solid fa-diagram-project" style="font-size: 3.5rem; color: rgba(255,255,255,0.15); margin-bottom: 1rem; display: block;"></i>
+                  Carga un archivo CSV o usa el dataset de ejemplo y presiona <strong>Descubrir Proceso</strong> para renderizar el mapa de procesos de forma interactiva.
+                </div>
+                <div id="pm-loading-overlay" class="hidden">
+                  <div class="spinner"></div>
+                  <p>Procesando minería de datos con PM4Py...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Bottom Layout (Conformance + Case Detail Table) -->
+            <div class="pm-bottom-layout" id="pm-bottom-layout" style="display: none; margin-top: 1.5rem; width: 100%;">
+              
+              <!-- Conformance Checking Panel -->
+              <div class="pm-conformance-panel" id="pm-conformance-panel">
+                <h3><i class="fa-solid fa-square-check" style="color: #10b981;"></i> Conformidad de Proceso</h3>
+                
+                <div class="conformity-score-container">
+                  <div class="conformity-score-info">
+                    <span>Calidad del Proceso</span>
+                    <h4 id="conformity-score-text">Cumplimiento General</h4>
+                  </div>
+                  <div class="conformity-badge" id="conformity-score-value">0%</div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">
+                  Desviaciones y Alertas Detectadas:
+                </div>
+
+                <div class="conformance-deviation-list">
+                  
+                  <!-- Alerta 1: Omisión de Demo -->
+                  <div class="conformance-deviation-item warning" id="deviation-demo" data-deviation="demo">
+                    <div class="deviation-info">
+                      <div class="deviation-title">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> Omisión de Demo
+                      </div>
+                      <div class="deviation-desc">Propuesta enviada sin realizar demo.</div>
+                    </div>
+                    <div class="deviation-count" id="deviation-demo-count">0</div>
+                  </div>
+
+                  <!-- Alerta 2: Contrato Grande sin Legal -->
+                  <div class="conformance-deviation-item" id="deviation-legal" data-deviation="legal">
+                    <div class="deviation-info">
+                      <div class="deviation-title">
+                        <i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i> Contrato Grande sin Legal
+                      </div>
+                      <div class="deviation-desc">Ganados > $15k sin aprobación Legal.</div>
+                    </div>
+                    <div class="deviation-count" id="deviation-legal-count">0</div>
+                  </div>
+
+                  <!-- Alerta 3: Salto de Calificación -->
+                  <div class="conformance-deviation-item warning" id="deviation-qual" data-deviation="qualification">
+                    <div class="deviation-info">
+                      <div class="deviation-title">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> Salto de Calificación
+                      </div>
+                      <div class="deviation-desc">Propuesta enviada sin calificar lead.</div>
+                    </div>
+                    <div class="deviation-count" id="deviation-qual-count">0</div>
+                  </div>
+
+                  <!-- Alerta 4: Bucle de Retrabajo -->
+                  <div class="conformance-deviation-item rework" id="deviation-rework" data-deviation="rework">
+                    <div class="deviation-info">
+                      <div class="deviation-title">
+                        <i class="fa-solid fa-arrows-spin" style="color: #c084fc;"></i> Bucle de Negociación
+                      </div>
+                      <div class="deviation-desc">Repeticiones en la etapa de negociación.</div>
+                    </div>
+                    <div class="deviation-count" id="deviation-rework-count">0</div>
+                  </div>
+
+                </div>
+
+                <button class="conformance-clear-filter-btn" id="btn-pm-clear-conformance" style="display: none;">
+                  <i class="fa-solid fa-filter-circle-xmark"></i> Quitar filtro de desviación
+                </button>
+              </div>
+
+              <!-- Case Detail Panel (Drill Down) -->
+              <div class="pm-detail-panel" id="pm-detail-panel" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 0.75rem; padding: 1.25rem; box-sizing: border-box;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem;">
+                  <h3 style="margin: 0; color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; font-family: 'Inter', sans-serif;">
+                    <i class="fa-solid fa-list-check"></i> Detalle de Casos: <span id="pm-detail-title" style="color: #f8fafc; font-weight: 500;">Todos los casos</span>
+                  </h3>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span id="pm-detail-count" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">0 casos</span>
+                    <button id="btn-pm-export-excel" style="background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 4px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: background 0.2s ease; font-family: 'Inter', sans-serif;">
+                      <i class="fa-solid fa-file-excel"></i> Exportar Excel
+                    </button>
+                  </div>
+                </div>
+                <div style="overflow-x: auto; max-height: 480px;">
+                  <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+                    <thead>
+                      <tr style="border-bottom: 2px solid rgba(255,255,255,0.08); color: #94a3b8;">
+                        <th style="padding: 0.5rem; text-align: left;">ID Oportunidad (Case ID)</th>
+                        <th style="padding: 0.5rem; text-align: left;">Última Actividad</th>
+                        <th style="padding: 0.5rem; text-align: left;">Vendedor / Recurso</th>
+                        <th style="padding: 0.5rem; text-align: right;">Monto Estimado</th>
+                        <th style="padding: 0.5rem; text-align: left; padding-left: 1.5rem;">Causa de Pérdida</th>
+                        <th style="padding: 0.5rem; text-align: right; width: 150px;">Última Actualización</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pm-detail-tbody" style="color: #cbd5e1;">
+                      <!-- Rows populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal para Creación de Cotizaciones / Facturas ERP -->
+    <div id="erp-modal" class="modal-backdrop hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-file-invoice"></i> Crear Documento de Venta ERP desde Chat</h3>
+          <button class="close-btn" id="close-erp-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tipo de Documento</label>
+            <select id="erp-doc-type">
+              <option value="QUOTE">Cotización Formal (COT)</option>
+              <option value="ORDER">Pedido de Venta (PED)</option>
+              <option value="INVOICE">Factura Electrónica (FAC)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-barcode"></i> Buscar por Código SKU o Nombre (Búsqueda en tiempo real)</label>
+            <input type="text" id="erp-prod-search-input" placeholder="🔍 Escribe SKU (ej. PROD-ACEITE, FERR, ELEC) o nombre..." style="width: 100%; margin-bottom: 0.6rem; padding: 0.55rem 0.75rem; border-radius: 6px; background: #0f172a; border: 1px solid #38bdf8; color: #f8fafc; font-weight: 500;">
+            <div class="product-selector-row">
+              <select id="erp-prod-select" style="flex: 1;"></select>
+              <input type="number" id="erp-prod-qty" value="1" min="1" style="width: 80px;">
+              <button class="btn btn-secondary" id="btn-add-item-to-doc"><i class="fa-solid fa-plus"></i> Agregar Item</button>
+            </div>
+          </div>
+
+          <h4>Detalle de Productos</h4>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cant.</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="modal-items-tbody"></tbody>
+          </table>
+
+          <div class="modal-summary">
+            <div>Subtotal: <strong id="modal-subtotal">$0.00</strong></div>
+            <div>Impuesto IVA (13%): <strong id="modal-tax">$0.00</strong></div>
+            <div class="total-line">Total a Emitir: <strong id="modal-total" class="text-success">$0.00</strong></div>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="cancel-erp-modal">Cancelar</button>
+          <button class="btn btn-primary" id="btn-submit-erp-doc" style="background: var(--wa-green); color: #000; font-weight: 700;"><i class="fa-solid fa-paper-plane"></i> Generar y Enviar por WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Registro / Edición de Cliente CRM -->
+    <div id="customer-modal" class="modal-backdrop hidden">
+      <div class="modal-box" style="width: 650px;">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-user-plus"></i> Expediente de Cliente CRM</h3>
+          <button class="close-btn" id="close-customer-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="customer-form">
+            <div class="form-group">
+              <label>Nombre del Cliente / Razón Social</label>
+              <input type="text" id="cust-input-name" placeholder="Ej. Distribuidora Los Laureles S.A." required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>Número Telefónico (WhatsApp)</label>
+                <input type="text" id="cust-input-phone" placeholder="+50670112233" required>
+              </div>
+              <div class="form-group">
+                <label>Cédula Jurídica / Identificación Fiscal</label>
+                <input type="text" id="cust-input-tax" placeholder="3-101-778899" required>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>Categoría / Tipo de Cliente</label>
+                <select id="cust-input-type">
+                  <option value="CLIENTE VIP">Cliente VIP</option>
+                  <option value="CLIENTE REGISTRADO">Cliente Registrado</option>
+                  <option value="NUEVO LEAD">Nuevo Lead</option>
+                  <option value="MAYORISTA">Mayorista</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Línea de Crédito Aprobada ($)</label>
+                <input type="number" id="cust-input-credit" placeholder="50000" value="50000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Dirección Completa de Entrega (Sucursal / Domicilio)</label>
+              <input type="text" id="cust-input-address" placeholder="San José, Barrio Amón 100m Este">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="cancel-customer-modal">Cancelar</button>
+          <button class="btn btn-primary" id="btn-save-customer"><i class="fa-solid fa-floppy-disk"></i> Guardar Ficha CRM</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pasarela WhatsApp por Código QR -->
+    <div id="qr-modal" class="modal-backdrop hidden">
+      <div class="modal-box" style="width: 580px; text-align: center;">
+        <div class="modal-header">
+          <h3><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> Conexión WhatsApp por Código QR</h3>
+          <button class="close-btn" id="close-qr-modal">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem 1rem;">
+          <div id="qr-status-badge" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; border-radius: 20px; background: rgba(234, 179, 8, 0.15); color: #facc15; font-weight: 600; font-size: 0.85rem; margin-bottom: 1.25rem;">
+            <span class="pulse-dot" style="width: 8px; height: 8px; background: #facc15; border-radius: 50%;"></span>
+            <span id="qr-status-text">Esperando escaneo de Código QR...</span>
+          </div>
+
+          <div style="background: #ffffff; padding: 1.25rem; border-radius: 12px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 1.25rem;">
+            <img id="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=WABA_PAIRING_CODE_CRM_2026_WHATSAPP_CONNECT" alt="Código QR WhatsApp" style="width: 220px; height: 220px; display: block;" />
+          </div>
+
+          <div style="text-align: left; background: rgba(30, 41, 59, 0.6); padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 0.75rem;">
+            <strong style="color: #38bdf8; display: block; margin-bottom: 0.4rem;"><i class="fa-solid fa-mobile-screen-button"></i> Vinculación de Número de WhatsApp:</strong>
+            • WhatsApp requiere un servidor pasarela activo (como <em>Baileys / Evolution API</em>) para generar la firma de handshake encriptada de cámara.<br>
+            • Si deseas vincular tu número de celular inmediatamente para probar la emisión de facturas y cotizaciones en vivo, haz clic en el botón verde <strong>Confirmar Vinculación de Celular</strong> abajo e ingresa tu número telefónico.
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-outline" id="btn-refresh-qr"><i class="fa-solid fa-rotate"></i> Regenerar QR</button>
+          <button class="btn btn-primary" id="btn-simulate-connect" style="background: var(--wa-green); color: #000; font-weight: 700;"><i class="fa-solid fa-link"></i> Confirmar Vinculación de Celular</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cytoscape.js CDN (required for interactive graph rendering) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
+  <!-- Main Resilient JS -->
+  <script src="src/main.js"></script>
+  <!-- Process Mining JS Module -->
+  <script src="src/services/processMining.js"></script>
+</body>
+</html>

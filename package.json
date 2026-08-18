@@ -1,0 +1,19 @@
+{
+  "name": "synex-cloud-crm",
+  "version": "1.0.0",
+  "description": "Synex Cloud CRM - Enterprise WhatsApp Business Cloud API Integration Module for ERP/CRM",
+  "main": "backend/dist/server.js",
+  "scripts": {
+    "build": "cd backend && npm install && npm run build",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev"
+  },
+  "keywords": [
+    "crm",
+    "whatsapp",
+    "meta-cloud-api",
+    "erp"
+  ],
+  "author": "Synex Tech",
+  "license": "MIT"
+}

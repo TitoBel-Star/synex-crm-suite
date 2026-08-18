@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "WhatsApp Cloud API Enterprise ERP/CRM Integration API",
+    "version": "1.0.0",
+    "description": "API REST Enterprise desacoplada y orientada a servicios para la integración de WhatsApp Business API (Meta Cloud API) con ERP, CRM, IA y Motor de Reglas No-Code."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Servidor Local de Desarrollo"
+    }
+  ],
+  "paths": {
+    "/webhooks/whatsapp": {
+      "get": {
+        "summary": "Handshake de Verificación de Webhook Meta",
+        "parameters": [
+          { "name": "hub.mode", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "hub.verify_token", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "hub.challenge", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Challenge retornado exitosamente" },
+          "403": { "description": "Token inválido" }
+        }
+      },
+      "post": {
+        "summary": "Recepción de Mensajes, Eventos y Estados de WhatsApp (Meta Webhook)",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": {} }
+        },
+        "responses": {
+          "200": { "description": "EVENT_RECEIVED" }
+        }
+      }
+    },
+    "/conversations": {
+      "get": {
+        "summary": "Obtener lista de conversaciones activas",
+        "responses": {
+          "200": { "description": "Lista de conversaciones" }
+        }
+      }
+    },
+    "/conversations/{id}/messages": {
+      "get": {
+        "summary": "Obtener historial de mensajes de un chat",
+        "responses": {
+          "200": { "description": "Mensajes retornados" }
+        }
+      },
+      "post": {
+        "summary": "Enviar mensaje por WhatsApp (Texto, Imagen, Documento, PDF)",
+        "responses": {
+          "200": { "description": "Mensaje enviado" }
+        }
+      }
+    },
+    "/crm/funnel": {
+      "get": {
+        "summary": "Obtener etapas del embudo de ventas y tratos (Kanban)",
+        "responses": {
+          "200": { "description": "Embudo retornado" }
+        }
+      }
+    },
+    "/erp/documents": {
+      "post": {
+        "summary": "Crear Cotización, Pedido o Facturación desde el chat ERP",
+        "responses": {
+          "200": { "description": "Documento ERP generado" }
+        }
+      }
+    },
+    "/automation/rules": {
+      "get": { "summary": "Listar reglas del motor de automatización" },
+      "post": { "summary": "Crear regla de automatización sin código" }
+    },
+    "/analytics": {
+      "get": { "summary": "Obtener métricas e indicadores ejecutivos KPI" }
+    }
+  }
+}

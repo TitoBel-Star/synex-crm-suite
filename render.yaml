@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: synex-cloud-crm
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: WEBHOOK_VERIFY_TOKEN
+        value: antigravity_webhook_secret_2026
