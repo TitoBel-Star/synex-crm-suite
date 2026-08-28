@@ -421,74 +421,85 @@ function renderMiningResult(data) {
   const placeholder = document.getElementById('pm-canvas-placeholder');
   if (placeholder) placeholder.style.display = 'none';
 
-  // Update Stats Cards
-  document.getElementById('pm-stat-cases').innerText = Number(data.stats.total_cases).toLocaleString();
-  document.getElementById('pm-stat-events').innerText = Number(data.stats.total_events).toLocaleString();
-  document.getElementById('pm-stat-avg-events').innerText = data.stats.avg_events_per_case;
-  document.getElementById('pm-stat-activities').innerText = data.stats.activity_count;
+  // Update legacy hidden stats (for backward compat)
+  const elEvents = document.getElementById('pm-stat-events');
+  const elAvg = document.getElementById('pm-stat-avg-events');
+  const elAct = document.getElementById('pm-stat-activities');
+  if (elEvents) elEvents.innerText = Number(data.stats.total_events).toLocaleString();
+  if (elAvg) elAvg.innerText = data.stats.avg_events_per_case;
+  if (elAct) elAct.innerText = data.stats.activity_count;
+
+  // Update Casos Analizados KPI
+  const elCases = document.getElementById('pm-stat-cases');
+  if (elCases) elCases.innerText = Number(data.stats.total_cases).toLocaleString();
 
   // Initialize table with all cases
   const allCaseIds = new Set(Object.keys(parsedCases));
   updateCaseDetailTable(allCaseIds, 'Todos los casos');
 
-  // Calculate total unique opportunity amounts for each activity node
-  const nodeAmounts = {};
+  // Run conformance checking first to get conformance % and deviation count
+  const conformanceResult = computeConformanceSummary(allCaseIds);
+  const elConformance = document.getElementById('pm-stat-conformance');
+  const elDeviations = document.getElementById('pm-stat-deviations');
+  if (elConformance) elConformance.innerText = conformanceResult.conformancePercent + '%';
+  if (elDeviations) elDeviations.innerText = conformanceResult.totalDeviations;
+
+  // Compute average time per edge (transition) from parsedCases
+  const edgeTimeSums = {};   // "A->B" -> total milliseconds
+  const edgeTimeCounts = {}; // "A->B" -> count
   for (const caseId in parsedCases) {
-    const seenActivities = new Set();
-    (parsedCases[caseId] || []).forEach(ev => {
-      if (!seenActivities.has(ev.activity)) {
-        seenActivities.add(ev.activity);
-        nodeAmounts[ev.activity] = (nodeAmounts[ev.activity] || 0) + (ev.amount || 0);
+    const events = parsedCases[caseId];
+    for (let i = 0; i < events.length - 1; i++) {
+      const key = `${events[i].activity}->${events[i+1].activity}`;
+      const t1 = new Date(events[i].timestamp).getTime();
+      const t2 = new Date(events[i+1].timestamp).getTime();
+      if (!isNaN(t1) && !isNaN(t2) && t2 > t1) {
+        edgeTimeSums[key] = (edgeTimeSums[key] || 0) + (t2 - t1);
+        edgeTimeCounts[key] = (edgeTimeCounts[key] || 0) + 1;
       }
-    });
+    }
   }
+
+  // Determine happy-path nodes (above median frequency)
+  const freqs = data.nodes.map(n => n.frequency);
+  const sortedFreqs = [...freqs].sort((a, b) => a - b);
+  const medianFreq = sortedFreqs[Math.floor(sortedFreqs.length / 2)] || 1;
 
   // Format elements for cytoscape
   const elements = [];
 
-  // Add Nodes
-  const maxFreqNode = Math.max(...data.nodes.map(n => n.frequency), 1);
+  // Add Nodes with light theme colors
   data.nodes.forEach(n => {
-    // Proportional node sizing (between 65px and 110px to fit amount text)
-    const ratio = n.frequency / maxFreqNode;
-    const nodeSize = 65 + (ratio * 45);
-    
-    // Get formatted amount
-    const amount = nodeAmounts[n.id] || 0;
-    const formattedAmt = amount > 0 ? `$${Math.round(amount).toLocaleString()}` : '$0';
-
-    // Custom label text: Activity\n(Freq - Amount)
-    const label = `${n.label}\n(${n.frequency.toLocaleString()} - ${formattedAmt})`;
-
+    const isHappy = n.frequency >= medianFreq;
     elements.push({
       data: {
         id: n.id,
-        label: label,
+        label: n.label,
         frequency: n.frequency,
-        size: nodeSize,
         isStart: n.is_start,
-        isEnd: n.is_end
+        isEnd: n.is_end,
+        isHappy: isHappy
       }
     });
   });
 
-  // Add Edges
+  // Add Edges with event count + avg time labels
   const maxFreqEdge = Math.max(...data.edges.map(e => e.frequency), 1);
   data.edges.forEach(e => {
-    // Proportional edge width (between 1.5px and 7px)
     const ratio = e.frequency / maxFreqEdge;
-    const edgeWidth = 1.5 + (ratio * 5.5);
-    
-    // Dynamic color (High frequency = cyan glow, Low frequency = dark slate)
-    // We map a color gradient: grey/slate (#475569) to bright blue/cyan (#00f2fe)
-    let color = '#475569';
-    if (ratio > 0.6) color = '#00f2fe';
-    else if (ratio > 0.3) color = '#38bdf8';
-    else if (ratio > 0.1) color = '#60a5fa';
-
-    // Highlight loop edges
+    const edgeWidth = 1.5 + (ratio * 3.5);
     const isLoop = e.type === 'loop_length_two';
-    const label = `${e.frequency} (dep: ${e.dependency.toFixed(2)})`;
+    const isBottleneck = ratio < 0.15; // low-frequency = bottleneck
+
+    const edgeKey = `${e.source}->${e.target}`;
+    let labelParts = [`${e.frequency} Eventos`];
+    if (edgeTimeCounts[edgeKey] > 0) {
+      const avgMs = edgeTimeSums[edgeKey] / edgeTimeCounts[edgeKey];
+      const avgDays = (avgMs / 86400000).toFixed(1);
+      if (parseFloat(avgDays) > 0) labelParts.push(`T. Promedio: ${avgDays} días`);
+    }
+    if (isBottleneck && e.frequency > 0) labelParts.push('Cuello de botella!');
+    const label = labelParts.join('\n');
 
     elements.push({
       data: {
@@ -497,31 +508,24 @@ function renderMiningResult(data) {
         target: e.target,
         label: label,
         width: edgeWidth,
-        color: isLoop ? '#f472b6' : color, // pink for loops, cyan/blue for others
         isLoop: isLoop,
-        style: isLoop ? 'dashed' : 'solid'
+        isBottleneck: isBottleneck
       }
     });
   });
 
-  // Create Cytoscape Instance
+  // Create / Re-create Cytoscape Instance
   const container = document.getElementById('pm-canvas-container');
-  
-  // Make sure we clear previous canvas divs if any (cytoscape appends its own)
-  // But wait, container is '#pm-canvas-container' which contains placeholder and overlay.
-  // Cytoscape will target this container, so we shouldn't wipe its HTML completely because of the overlay,
-  // instead we make sure cytoscape targets the element cleanly. If cyInstance exists, we destroy it.
-  if (cyInstance) {
-    cyInstance.destroy();
-  }
+  if (cyInstance) cyInstance.destroy();
 
   cyInstance = cytoscape({
     container: container,
     elements: elements,
     boxSelectionEnabled: false,
     autounselectify: true,
-    
+
     style: [
+      // Default node: light gray (low-frequency / deviation path)
       {
         selector: 'node',
         style: {
@@ -529,85 +533,111 @@ function renderMiningResult(data) {
           'text-wrap': 'wrap',
           'text-valign': 'center',
           'text-halign': 'center',
-          'font-size': '10px',
+          'font-size': '11px',
           'font-weight': '600',
           'font-family': 'Inter, sans-serif',
-          'color': '#ffffff',
-          'background-color': '#1e293b',
-          'border-width': '2.5px',
-          'border-color': '#475569',
-          'width': 'data(size)',
-          'height': 'data(size)',
-          'text-outline-color': '#1e293b',
-          'text-outline-width': '2px',
+          'color': '#dc2626',
+          'background-color': '#fee2e2',
+          'border-width': '2px',
+          'border-color': '#ef4444',
+          'width': 140,
+          'height': 44,
+          'shape': 'roundrectangle',
           'transition-property': 'background-color, border-color',
           'transition-duration': '0.2s'
         }
       },
+      // Happy-path nodes: green
       {
-        selector: 'node[?isStart]',
+        selector: 'node[?isHappy]',
         style: {
-          'border-color': '#10b981', // green for start activities
-          'background-color': '#064e3b',
-          'text-outline-color': '#064e3b'
+          'color': '#15803d',
+          'background-color': '#dcfce7',
+          'border-color': '#22c55e'
         }
       },
+      // Start node: circle, light gray
       {
-        selector: 'node[?isEnd]',
+        selector: 'node[?isStart][!isEnd]',
         style: {
-          'border-color': '#ef4444', // red for end activities
-          'background-color': '#7f1d1d',
-          'text-outline-color': '#7f1d1d'
+          'shape': 'ellipse',
+          'width': 60,
+          'height': 60,
+          'color': '#475569',
+          'background-color': '#f1f5f9',
+          'border-color': '#94a3b8',
+          'border-width': '1.5px',
+          'label': 'Inicio'
         }
       },
+      // Edges: dark gray arrows
       {
         selector: 'edge',
         style: {
           'label': 'data(label)',
-          'font-size': '8px',
+          'font-size': '9px',
           'font-weight': '500',
           'font-family': 'Inter, sans-serif',
-          'color': '#cbd5e1',
+          'color': '#475569',
           'width': 'data(width)',
-          'line-color': 'data(color)',
-          'target-arrow-color': 'data(color)',
+          'line-color': '#94a3b8',
+          'target-arrow-color': '#94a3b8',
           'target-arrow-shape': 'triangle',
-          'curve-style': 'bezier',
-          'line-style': 'data(style)',
-          'text-background-opacity': 0.85,
-          'text-background-color': '#0c111d',
+          'curve-style': 'taxi',
+          'taxi-direction': 'downward',
+          'taxi-turn': 40,
+          'text-background-opacity': 0.9,
+          'text-background-color': '#f8fafc',
           'text-background-padding': '2px',
           'text-background-shape': 'roundrectangle',
           'text-border-width': '0.5px',
-          'text-border-color': 'rgba(255,255,255,0.08)'
+          'text-border-color': '#e2e8f0',
+          'line-style': 'solid',
+          'text-wrap': 'wrap'
         }
       },
+      // Bottleneck edges: dashed orange
+      {
+        selector: 'edge[?isBottleneck]',
+        style: {
+          'line-color': '#f97316',
+          'target-arrow-color': '#f97316',
+          'line-style': 'dashed',
+          'color': '#ea580c'
+        }
+      },
+      // Loop edges: pink
       {
         selector: 'edge[?isLoop]',
         style: {
-          'control-point-step-size': 40,
-          'line-style': 'dashed'
+          'line-color': '#ec4899',
+          'target-arrow-color': '#ec4899',
+          'line-style': 'dashed',
+          'color': '#db2777'
         }
       },
+      // Selected node highlight
       {
         selector: 'node:selected',
         style: {
-          'background-color': '#334155',
-          'border-color': '#38bdf8'
+          'border-color': '#3b82f6',
+          'border-width': '3px'
         }
       }
     ],
-    
+
     layout: {
       name: 'breadthfirst',
       directed: true,
-      padding: 50,
-      spacingFactor: 1.15,
-      animate: false
+      padding: 60,
+      spacingFactor: 1.4,
+      avoidOverlap: true,
+      animate: false,
+      roots: data.nodes.filter(n => n.is_start).map(n => n.id)
     }
   });
 
-  // Automatic resize and fit on initialization to ensure nothing is cropped
+  // Fit after ready
   cyInstance.ready(() => {
     setTimeout(() => {
       if (cyInstance) {
@@ -618,78 +648,88 @@ function renderMiningResult(data) {
     }, 200);
   });
 
-  // Highlight connections on hover / click and update table
+  // Tap node: highlight neighborhood and update table
   cyInstance.on('tap', 'node', function(evt) {
     const node = evt.target;
     const activityName = node.id();
-    const neighborhood = node.neighborhood();
-    
-    // Dim all elements
-    cyInstance.elements().addClass('dimmed');
     cyInstance.elements().style('opacity', 0.2);
-    
-    // Reset opacity for active selection
-    node.removeClass('dimmed').style('opacity', 1);
-    neighborhood.removeClass('dimmed').style('opacity', 1);
-    
-    console.log(`[Process Mining] Inspected node: ${activityName} with occurrences = ${node.data('frequency')}`);
+    node.style('opacity', 1);
+    node.neighborhood().style('opacity', 1);
 
-    // Find all cases that touched this activity
     const matchingCases = new Set();
     for (const caseId in parsedCases) {
-      if (parsedCases[caseId].some(e => e.activity === activityName)) {
-        matchingCases.add(caseId);
-      }
+      if (parsedCases[caseId].some(e => e.activity === activityName)) matchingCases.add(caseId);
     }
     updateCaseDetailTable(matchingCases, `Casos que pasaron por: "${activityName}"`);
   });
 
-  // Click on edges to inspect transitions
+  // Tap edge: highlight and update table
   cyInstance.on('tap', 'edge', function(evt) {
     const edge = evt.target;
     const sourceAct = edge.data('source');
     const targetAct = edge.data('target');
-
-    // Dim all elements except this edge and its endpoints
-    cyInstance.elements().addClass('dimmed');
     cyInstance.elements().style('opacity', 0.1);
-    edge.removeClass('dimmed').style('opacity', 1);
-    edge.source().removeClass('dimmed').style('opacity', 1);
-    edge.target().removeClass('dimmed').style('opacity', 1);
+    edge.style('opacity', 1);
+    edge.source().style('opacity', 1);
+    edge.target().style('opacity', 1);
 
-    // Find all cases that transitioned directly from source to target
     const matchingCases = new Set();
     for (const caseId in parsedCases) {
       const events = parsedCases[caseId];
       for (let i = 0; i < events.length - 1; i++) {
-        if (events[i].activity === sourceAct && events[i + 1].activity === targetAct) {
-          matchingCases.add(caseId);
-          break;
-        }
+        if (events[i].activity === sourceAct && events[i + 1].activity === targetAct) { matchingCases.add(caseId); break; }
       }
     }
     updateCaseDetailTable(matchingCases, `Transición: "${sourceAct}" ➔ "${targetAct}"`);
   });
 
-  // Reset opacity when tapping canvas background
+  // Tap background: reset
   cyInstance.on('tap', function(evt) {
     if (evt.target === cyInstance) {
-      cyInstance.elements().removeClass('dimmed').style('opacity', 1);
-      
-      // Reset table to show all cases
-      const allCaseIds = new Set(Object.keys(parsedCases));
-      updateCaseDetailTable(allCaseIds, 'Todos los casos');
-      
-      // Clear conformance visual highlights when resetting canvas
+      cyInstance.elements().style('opacity', 1);
+      updateCaseDetailTable(new Set(Object.keys(parsedCases)), 'Todos los casos');
       clearConformanceFilter(false);
     }
   });
 
-  // Execute conformance checking on all active cases
+  // Execute conformance checking
   runConformanceChecking(allCaseIds);
 }
 
+// Compute conformance summary: percentage of cases following happy path + total deviations
+function computeConformanceSummary(caseIds) {
+  let happyCases = 0;
+  let totalDeviations = 0;
+
+  for (const caseId of caseIds) {
+    const events = parsedCases[caseId] || [];
+    const activities = events.map(e => e.activity);
+
+    const hasDemo = activities.includes('Realizar Demo') || activities.includes('Agendar Demo');
+    const hasCerrarGanado = activities.includes('Cerrar Ganado');
+    const hasEnviarPropuesta = activities.includes('Enviar Propuesta');
+    const hasCalificar = activities.includes('Calificar Lead');
+
+    let caseDeviations = 0;
+    // Deviation 1: Propuesta sin demo
+    if (hasEnviarPropuesta && !hasDemo && hasCerrarGanado) caseDeviations++;
+    // Deviation 2: Ganado >15k sin Legal
+    const amount = events.length > 0 ? (events[0].amount || 0) : 0;
+    if (hasCerrarGanado && amount > 15000 && !activities.includes('Aprobación Legal')) caseDeviations++;
+    // Deviation 3: Propuesta sin calificar
+    if (hasEnviarPropuesta && !hasCalificar) caseDeviations++;
+
+    if (caseDeviations === 0) happyCases++;
+    totalDeviations += caseDeviations;
+  }
+
+  const total = caseIds.size || 1;
+  const conformancePercent = Math.round((happyCases / total) * 100 * 10) / 10;
+  return { conformancePercent, totalDeviations };
+}
+
 function parseCsvData(csv) {
+
   parsedCases = {};
   if (!csv) return;
 

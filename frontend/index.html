@@ -612,57 +612,53 @@
           
           <!-- Graph & Stats Main Area -->
           <div class="pm-main-content">
-            <!-- Summary Stats Cards -->
-            <div class="pm-stats-grid">
-              <div class="pm-stat-card">
-                <div class="icon-circle" style="background: rgba(0, 242, 254, 0.1); color: #00f2fe;"><i class="fa-solid fa-folder-open"></i></div>
-                <div class="stat-info">
-                  <span class="stat-lbl">Casos Totales</span>
-                  <h3 id="pm-stat-cases">-</h3>
-                </div>
+
+            <!-- Section Title -->
+            <div class="pm-section-header">
+              <h2 class="pm-section-title">Minería de Procesos y Conformance Checking</h2>
+              <p class="pm-section-subtitle">Descubre el mapa de procesos real a partir del log de eventos y detecta cuellos de botella.</p>
+            </div>
+
+            <!-- 3 KPI Cards -->
+            <div class="pm-kpi-grid">
+              <div class="pm-kpi-card pm-kpi-neutral">
+                <div class="pm-kpi-value" id="pm-stat-cases">-</div>
+                <div class="pm-kpi-label">CASOS ANALIZADOS</div>
               </div>
-              <div class="pm-stat-card">
-                <div class="icon-circle" style="background: rgba(79, 172, 254, 0.1); color: #4facfe;"><i class="fa-solid fa-hashtag"></i></div>
-                <div class="stat-info">
-                  <span class="stat-lbl">Eventos Totales</span>
-                  <h3 id="pm-stat-events">-</h3>
-                </div>
+              <div class="pm-kpi-card pm-kpi-green">
+                <div class="pm-kpi-value" id="pm-stat-conformance">-</div>
+                <div class="pm-kpi-label">CONFORMIDAD (HAPPY PATH)</div>
               </div>
-              <div class="pm-stat-card">
-                <div class="icon-circle" style="background: rgba(52, 211, 153, 0.1); color: #34d399;"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
-                <div class="stat-info">
-                  <span class="stat-lbl">Eventos por Caso</span>
-                  <h3 id="pm-stat-avg-events">-</h3>
-                </div>
-              </div>
-              <div class="pm-stat-card">
-                <div class="icon-circle" style="background: rgba(167, 139, 250, 0.1); color: #a78bfa;"><i class="fa-solid fa-cube"></i></div>
-                <div class="stat-info">
-                  <span class="stat-lbl">Actividades Únicas</span>
-                  <h3 id="pm-stat-activities">-</h3>
-                </div>
+              <div class="pm-kpi-card pm-kpi-red">
+                <div class="pm-kpi-value" id="pm-stat-deviations">-</div>
+                <div class="pm-kpi-label">DESVIACIONES CRÍTICAS</div>
               </div>
             </div>
+
+            <!-- Hidden legacy stats (kept for JS compatibility) -->
+            <span id="pm-stat-events" style="display:none;">-</span>
+            <span id="pm-stat-avg-events" style="display:none;">-</span>
+            <span id="pm-stat-activities" style="display:none;">-</span>
             
             <!-- Graph Visualization Panel -->
-            <div class="pm-graph-panel">
-              <div class="panel-header">
-                <h3><i class="fa-solid fa-network-wired"></i> Mapa de Procesos (Heuristic Net)</h3>
+            <div class="pm-graph-panel pm-graph-panel-white">
+              <div class="panel-header pm-panel-header-white">
+                <h3 style="color:#1e293b;"><i class="fa-solid fa-network-wired" style="color:#3b82f6;"></i> Mapa de Procesos (Heuristic Net)</h3>
                 <div class="panel-actions">
                   <button class="btn btn-outline btn-sm" id="btn-pm-zoom-in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
                   <button class="btn btn-outline btn-sm" id="btn-pm-zoom-out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
                   <button class="btn btn-outline btn-sm" id="btn-pm-fit"><i class="fa-solid fa-compress"></i> Ajustar</button>
                 </div>
               </div>
-              <div id="pm-canvas-container" class="pm-canvas">
+              <div id="pm-canvas-container" class="pm-canvas pm-canvas-white">
                 <!-- Cytoscape will render here -->
-                <div class="pm-placeholder-message" id="pm-canvas-placeholder">
-                  <i class="fa-solid fa-diagram-project" style="font-size: 3.5rem; color: rgba(255,255,255,0.15); margin-bottom: 1rem; display: block;"></i>
-                  Carga un archivo CSV o usa el dataset de ejemplo y presiona <strong>Descubrir Proceso</strong> para renderizar el mapa de procesos de forma interactiva.
+                <div class="pm-placeholder-message" id="pm-canvas-placeholder" style="color:#64748b;">
+                  <i class="fa-solid fa-diagram-project" style="font-size: 3.5rem; color: #cbd5e1; margin-bottom: 1rem; display: block;"></i>
+                  Carga un archivo CSV o usa el dataset de ejemplo y presiona <strong>Descubrir Proceso</strong> para renderizar el mapa de procesos.
                 </div>
                 <div id="pm-loading-overlay" class="hidden">
                   <div class="spinner"></div>
-                  <p>Procesando minería de datos con PM4Py...</p>
+                  <p>Ejecutando algoritmo Heuristic Miner...</p>
                 </div>
               </div>
             </div>
