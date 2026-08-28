@@ -15,90 +15,175 @@ let allActiveCasesBeforeDeviationFilter = new Set();
 
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000/api/v1' : '/api/v1';
 
-// Fallback CSV Data - Proceso de Ventas CRM
+// Fallback CSV Data - Proceso Real de Ventas CRM
 const FALLBACK_CRM_CSV = `case_id,activity,timestamp,resource,amount,lost_reason
-OPP-1001,Crear Lead,2026-07-01 09:00:00,Ana Gomez,15000,
-OPP-1001,Contactar Cliente,2026-07-01 10:30:00,Ana Gomez,15000,
-OPP-1001,Calificar Lead,2026-07-02 14:00:00,Ana Gomez,15000,
-OPP-1001,Enviar Propuesta,2026-07-03 11:00:00,Ana Gomez,15000,
-OPP-1001,Negociación,2026-07-04 16:30:00,Carlos Mendoza,15000,
-OPP-1001,Cerrar Ganado,2026-07-06 10:00:00,Carlos Mendoza,15000,
-OPP-1002,Crear Lead,2026-07-01 09:15:00,Luis Perez,25000,
-OPP-1002,Contactar Cliente,2026-07-01 11:00:00,Luis Perez,25000,
-OPP-1002,Cerrar Perdido,2026-07-02 15:30:00,Luis Perez,25000,Precio muy alto
-OPP-1003,Crear Lead,2026-07-01 09:30:00,Maria Rodriguez,8000,
-OPP-1003,Contactar Cliente,2026-07-01 12:00:00,Maria Rodriguez,8000,
-OPP-1003,Calificar Lead,2026-07-02 16:00:00,Maria Rodriguez,8000,
-OPP-1003,Agendar Demo,2026-07-03 09:30:00,Maria Rodriguez,8000,
-OPP-1003,Realizar Demo,2026-07-04 14:00:00,Maria Rodriguez,8000,
-OPP-1003,Enviar Propuesta,2026-07-05 10:30:00,Maria Rodriguez,8000,
-OPP-1003,Negociación,2026-07-06 15:00:00,Elena Silva,8000,
-OPP-1003,Cerrar Ganado,2026-07-08 11:30:00,Elena Silva,8000,
-OPP-1004,Crear Lead,2026-07-01 10:00:00,Juan Martinez,18000,
-OPP-1004,Contactar Cliente,2026-07-01 14:30:00,Juan Martinez,18000,
-OPP-1004,Calificar Lead,2026-07-02 11:00:00,Juan Martinez,18000,
-OPP-1004,Enviar Propuesta,2026-07-03 15:30:00,Juan Martinez,18000,
-OPP-1004,Negociación,2026-07-04 10:00:00,Carlos Mendoza,18000,
-OPP-1004,Cerrar Ganado,2026-07-06 09:30:00,Carlos Mendoza,18000,
-OPP-1005,Crear Lead,2026-07-02 09:00:00,Ana Gomez,12000,
-OPP-1005,Contactar Cliente,2026-07-02 11:30:00,Ana Gomez,12000,
-OPP-1005,Calificar Lead,2026-07-03 14:00:00,Ana Gomez,12000,
-OPP-1005,Enviar Propuesta,2026-07-04 10:30:00,Ana Gomez,12000,
-OPP-1005,Cerrar Perdido,2026-07-05 16:00:00,Ana Gomez,12000,La calidad no le gusta al cliente
-OPP-1006,Crear Lead,2026-07-02 10:00:00,Luis Perez,35000,
-OPP-1006,Contactar Cliente,2026-07-02 15:00:00,Luis Perez,35000,
-OPP-1006,Calificar Lead,2026-07-03 11:30:00,Luis Perez,35000,
-OPP-1006,Agendar Demo,2026-07-04 09:00:00,Luis Perez,35000,
-OPP-1006,Realizar Demo,2026-07-05 14:00:00,Luis Perez,35000,
-OPP-1006,Enviar Propuesta,2026-07-06 10:30:00,Luis Perez,35000,
-OPP-1006,Negociación,2026-07-07 15:00:00,Carlos Mendoza,35000,
-OPP-1006,Aprobación Legal,2026-07-08 11:00:00,Abog. Ruiz,35000,
-OPP-1006,Cerrar Ganado,2026-07-10 16:30:00,Carlos Mendoza,35000,
-OPP-1007,Crear Lead,2026-07-03 09:00:00,Maria Rodriguez,16000,
-OPP-1007,Contactar Cliente,2026-07-03 11:00:00,Maria Rodriguez,16000,
-OPP-1007,Calificar Lead,2026-07-04 14:30:00,Maria Rodriguez,16000,
-OPP-1007,Enviar Propuesta,2026-07-05 10:00:00,Maria Rodriguez,16000,
-OPP-1007,Negociación,2026-07-06 15:30:00,Elena Silva,16000,
-OPP-1007,Cerrar Ganado,2026-07-08 09:00:00,Elena Silva,16000,
-OPP-1008,Crear Lead,2026-07-03 10:30:00,Juan Martinez,5000,
-OPP-1008,Contactar Cliente,2026-07-03 14:00:00,Juan Martinez,5000,
-OPP-1008,Cerrar Perdido,2026-07-04 16:00:00,Juan Martinez,5000,Sin presupuesto / Proyecto cancelado
-OPP-1009,Crear Lead,2026-07-04 09:00:00,Ana Gomez,22000,
-OPP-1009,Contactar Cliente,2026-07-04 11:30:00,Ana Gomez,22000,
-OPP-1009,Calificar Lead,2026-07-05 14:00:00,Ana Gomez,22000,
-OPP-1009,Enviar Propuesta,2026-07-06 10:30:00,Ana Gomez,22000,
-OPP-1009,Cerrar Perdido,2026-07-07 16:00:00,Ana Gomez,22000,No tiene credito con la empresa
-OPP-1010,Crear Lead,2026-07-04 10:00:00,Luis Perez,14000,
-OPP-1010,Contactar Cliente,2026-07-04 15:00:00,Luis Perez,14000,
-OPP-1010,Cerrar Perdido,2026-07-05 16:30:00,Luis Perez,14000,No tenemos el producto (sin existencias)
-OPP-1011,Crear Lead,2026-07-05 09:30:00,Maria Rodriguez,9000,
-OPP-1011,Contactar Cliente,2026-07-05 12:00:00,Maria Rodriguez,9000,
-OPP-1011,Cerrar Perdido,2026-07-06 15:30:00,Maria Rodriguez,9000,Percibe mal servicio de parte de empresa
-OPP-1012,Crear Lead,2026-07-05 10:00:00,Juan Martinez,30000,
-OPP-1012,Contactar Cliente,2026-07-05 14:30:00,Juan Martinez,30000,
-OPP-1012,Calificar Lead,2026-07-06 11:00:00,Juan Martinez,30000,
-OPP-1012,Enviar Propuesta,2026-07-07 15:30:00,Juan Martinez,30000,
-OPP-1012,Negociación,2026-07-08 10:00:00,Carlos Mendoza,30000,
-OPP-1012,Cerrar Ganado,2026-07-10 09:30:00,Carlos Mendoza,30000,
-OPP-1013,Crear Lead,2026-07-06 09:00:00,Ana Gomez,19000,
-OPP-1013,Contactar Cliente,2026-07-06 11:30:00,Ana Gomez,19000,
-OPP-1013,Calificar Lead,2026-07-07 14:00:00,Ana Gomez,19000,
-OPP-1013,Enviar Propuesta,2026-07-08 10:30:00,Ana Gomez,19000,
-OPP-1013,Negociación,2026-07-09 15:00:00,Elena Silva,19000,
-OPP-1013,Aprobación Legal,2026-07-10 11:00:00,Abog. Castro,19000,
-OPP-1013,Cerrar Ganado,2026-07-12 16:30:00,Elena Silva,19000,
-OPP-1014,Crear Lead,2026-07-06 10:00:00,Luis Perez,15000,
-OPP-1014,Contactar Cliente,2026-07-06 15:00:00,Luis Perez,15000,
-OPP-1014,Calificar Lead,2026-07-07 11:30:00,Luis Perez,15000,
-OPP-1014,Enviar Propuesta,2026-07-08 10:30:00,Luis Perez,15000,
-OPP-1014,Negociación,2026-07-09 15:00:00,Carlos Mendoza,15000,
-OPP-1014,Cerrar Ganado,2026-07-11 16:30:00,Carlos Mendoza,15000,
-OPP-1015,Crear Lead,2026-07-07 09:00:00,Maria Rodriguez,12000,
-OPP-1015,Contactar Cliente,2026-07-07 11:00:00,Maria Rodriguez,12000,
-OPP-1015,Calificar Lead,2026-07-08 14:30:00,Maria Rodriguez,12000,
-OPP-1015,Enviar Propuesta,2026-07-09 10:00:00,Maria Rodriguez,12000,
-OPP-1015,Negociación,2026-07-10 15:30:00,Elena Silva,12000,
-OPP-1015,Cerrar Ganado,2026-07-12 09:00:00,Elena Silva,12000,`;
+OPP-001,Crear Lead,2026-07-01 08:00:00,Ana Gomez,18000,
+OPP-001,Contactar Cliente,2026-07-01 10:00:00,Ana Gomez,18000,
+OPP-001,Calificar Lead,2026-07-02 09:00:00,Ana Gomez,18000,
+OPP-001,Enviar Cotizacion,2026-07-03 11:00:00,Ana Gomez,18000,
+OPP-001,Agendar Demo,2026-07-04 09:00:00,Ana Gomez,18000,
+OPP-001,Realizar Demo,2026-07-05 14:00:00,Ana Gomez,18000,
+OPP-001,Enviar Propuesta,2026-07-06 10:00:00,Ana Gomez,18000,
+OPP-001,Negociacion,2026-07-08 15:00:00,Carlos Mendoza,18000,
+OPP-001,Cerrar Ganado,2026-07-10 09:00:00,Carlos Mendoza,18000,
+OPP-002,Crear Lead,2026-07-01 09:00:00,Luis Perez,25000,
+OPP-002,Contactar Cliente,2026-07-01 11:30:00,Luis Perez,25000,
+OPP-002,Calificar Lead,2026-07-02 14:00:00,Luis Perez,25000,
+OPP-002,Enviar Cotizacion,2026-07-03 10:00:00,Luis Perez,25000,
+OPP-002,Agendar Demo,2026-07-04 10:00:00,Luis Perez,25000,
+OPP-002,Realizar Demo,2026-07-05 15:00:00,Luis Perez,25000,
+OPP-002,Enviar Propuesta,2026-07-06 11:00:00,Luis Perez,25000,
+OPP-002,Negociacion,2026-07-08 09:00:00,Carlos Mendoza,25000,
+OPP-002,Cerrar Ganado,2026-07-10 16:00:00,Carlos Mendoza,25000,
+OPP-003,Crear Lead,2026-07-02 08:30:00,Maria Rodriguez,12000,
+OPP-003,Contactar Cliente,2026-07-02 10:30:00,Maria Rodriguez,12000,
+OPP-003,Calificar Lead,2026-07-03 09:00:00,Maria Rodriguez,12000,
+OPP-003,Enviar Cotizacion,2026-07-04 11:00:00,Maria Rodriguez,12000,
+OPP-003,Prospecto acepto cotizacion,2026-07-05 10:00:00,Maria Rodriguez,12000,
+OPP-003,Enviar Propuesta,2026-07-06 09:30:00,Maria Rodriguez,12000,
+OPP-003,Negociacion,2026-07-07 15:00:00,Elena Silva,12000,
+OPP-003,Cerrar Ganado,2026-07-09 10:00:00,Elena Silva,12000,
+OPP-004,Crear Lead,2026-07-02 09:00:00,Juan Martinez,32000,
+OPP-004,Contactar Cliente,2026-07-02 11:00:00,Juan Martinez,32000,
+OPP-004,Calificar Lead,2026-07-03 10:00:00,Juan Martinez,32000,
+OPP-004,Enviar Cotizacion,2026-07-04 09:00:00,Juan Martinez,32000,
+OPP-004,Agendar Demo,2026-07-05 09:00:00,Juan Martinez,32000,
+OPP-004,Realizar Demo,2026-07-07 14:00:00,Juan Martinez,32000,
+OPP-004,Enviar Propuesta,2026-07-08 10:00:00,Juan Martinez,32000,
+OPP-004,Negociacion,2026-07-10 15:00:00,Carlos Mendoza,32000,
+OPP-004,Cerrar Ganado,2026-07-12 09:00:00,Carlos Mendoza,32000,
+OPP-005,Crear Lead,2026-07-03 08:00:00,Ana Gomez,9500,
+OPP-005,Contactar Cliente,2026-07-03 10:00:00,Ana Gomez,9500,
+OPP-005,Calificar Lead,2026-07-04 09:30:00,Ana Gomez,9500,
+OPP-005,Enviar Cotizacion,2026-07-05 11:00:00,Ana Gomez,9500,
+OPP-005,Prospecto acepto cotizacion,2026-07-06 09:00:00,Ana Gomez,9500,
+OPP-005,Enviar Propuesta,2026-07-07 10:00:00,Ana Gomez,9500,
+OPP-005,Negociacion,2026-07-08 15:00:00,Elena Silva,9500,
+OPP-005,Cerrar Ganado,2026-07-10 11:00:00,Elena Silva,9500,
+OPP-006,Crear Lead,2026-07-03 09:00:00,Luis Perez,14000,
+OPP-006,Contactar Cliente,2026-07-03 11:00:00,Luis Perez,14000,
+OPP-006,Calificar Lead,2026-07-04 10:00:00,Luis Perez,14000,
+OPP-006,Enviar Cotizacion,2026-07-05 09:00:00,Luis Perez,14000,
+OPP-006,Agendar Demo,2026-07-06 10:00:00,Luis Perez,14000,
+OPP-006,Realizar Demo,2026-07-07 15:00:00,Luis Perez,14000,
+OPP-006,Enviar Propuesta,2026-07-08 11:00:00,Luis Perez,14000,
+OPP-006,Negociacion,2026-07-10 09:00:00,Carlos Mendoza,14000,
+OPP-006,Cerrar Ganado,2026-07-12 15:00:00,Carlos Mendoza,14000,
+OPP-007,Crear Lead,2026-07-04 08:30:00,Maria Rodriguez,21000,
+OPP-007,Contactar Cliente,2026-07-04 10:30:00,Maria Rodriguez,21000,
+OPP-007,Calificar Lead,2026-07-05 09:00:00,Maria Rodriguez,21000,
+OPP-007,Enviar Cotizacion,2026-07-06 11:00:00,Maria Rodriguez,21000,
+OPP-007,Agendar Demo,2026-07-07 09:00:00,Maria Rodriguez,21000,
+OPP-007,Realizar Demo,2026-07-08 14:00:00,Maria Rodriguez,21000,
+OPP-007,Enviar Propuesta,2026-07-09 10:00:00,Maria Rodriguez,21000,
+OPP-007,Negociacion,2026-07-11 15:00:00,Elena Silva,21000,
+OPP-007,Cerrar Ganado,2026-07-13 09:00:00,Elena Silva,21000,
+OPP-008,Crear Lead,2026-07-05 08:00:00,Juan Martinez,16000,
+OPP-008,Contactar Cliente,2026-07-05 10:00:00,Juan Martinez,16000,
+OPP-008,Calificar Lead,2026-07-06 09:30:00,Juan Martinez,16000,
+OPP-008,Enviar Cotizacion,2026-07-07 11:00:00,Juan Martinez,16000,
+OPP-008,Prospecto acepto cotizacion,2026-07-08 10:00:00,Juan Martinez,16000,
+OPP-008,Enviar Propuesta,2026-07-09 09:00:00,Juan Martinez,16000,
+OPP-008,Negociacion,2026-07-11 15:00:00,Carlos Mendoza,16000,
+OPP-008,Cerrar Ganado,2026-07-13 10:00:00,Carlos Mendoza,16000,
+OPP-009,Crear Lead,2026-07-05 09:00:00,Ana Gomez,28000,
+OPP-009,Contactar Cliente,2026-07-05 11:30:00,Ana Gomez,28000,
+OPP-009,Calificar Lead,2026-07-06 14:00:00,Ana Gomez,28000,
+OPP-009,Enviar Cotizacion,2026-07-07 10:00:00,Ana Gomez,28000,
+OPP-009,Agendar Demo,2026-07-08 09:00:00,Ana Gomez,28000,
+OPP-009,Realizar Demo,2026-07-09 14:00:00,Ana Gomez,28000,
+OPP-009,Enviar Propuesta,2026-07-10 11:00:00,Ana Gomez,28000,
+OPP-009,Negociacion,2026-07-12 15:00:00,Carlos Mendoza,28000,
+OPP-009,Cerrar Ganado,2026-07-14 09:00:00,Carlos Mendoza,28000,
+OPP-010,Crear Lead,2026-07-06 08:30:00,Luis Perez,19000,
+OPP-010,Contactar Cliente,2026-07-06 10:30:00,Luis Perez,19000,
+OPP-010,Calificar Lead,2026-07-07 09:00:00,Luis Perez,19000,
+OPP-010,Enviar Cotizacion,2026-07-08 11:00:00,Luis Perez,19000,
+OPP-010,Prospecto acepto cotizacion,2026-07-09 10:00:00,Luis Perez,19000,
+OPP-010,Enviar Propuesta,2026-07-10 09:00:00,Luis Perez,19000,
+OPP-010,Negociacion,2026-07-12 15:00:00,Elena Silva,19000,
+OPP-010,Cerrar Ganado,2026-07-14 10:00:00,Elena Silva,19000,
+OPP-011,Crear Lead,2026-07-07 08:00:00,Maria Rodriguez,11000,
+OPP-011,Contactar Cliente,2026-07-07 10:00:00,Maria Rodriguez,11000,
+OPP-011,Calificar Lead,2026-07-08 09:30:00,Maria Rodriguez,11000,
+OPP-011,Enviar Cotizacion,2026-07-09 11:00:00,Maria Rodriguez,11000,
+OPP-011,Agendar Demo,2026-07-10 09:00:00,Maria Rodriguez,11000,
+OPP-011,Realizar Demo,2026-07-11 14:00:00,Maria Rodriguez,11000,
+OPP-011,Enviar Propuesta,2026-07-12 10:00:00,Maria Rodriguez,11000,
+OPP-011,Negociacion,2026-07-14 15:00:00,Carlos Mendoza,11000,
+OPP-011,Negociacion,2026-07-16 10:00:00,Carlos Mendoza,11000,
+OPP-011,Cerrar Ganado,2026-07-17 09:00:00,Carlos Mendoza,11000,
+OPP-012,Crear Lead,2026-07-01 09:00:00,Juan Martinez,8000,
+OPP-012,Contactar Cliente,2026-07-01 11:00:00,Juan Martinez,8000,
+OPP-012,Calificar Lead,2026-07-02 10:00:00,Juan Martinez,8000,
+OPP-012,Enviar Cotizacion,2026-07-03 09:00:00,Juan Martinez,8000,
+OPP-012,Prospecto no acepto cotizacion,2026-07-04 15:00:00,Juan Martinez,8000,Precio alto
+OPP-012,Cerrar Perdido,2026-07-04 15:30:00,Juan Martinez,8000,Precio alto
+OPP-013,Crear Lead,2026-07-02 08:00:00,Ana Gomez,15000,
+OPP-013,Contactar Cliente,2026-07-02 10:00:00,Ana Gomez,15000,
+OPP-013,Calificar Lead,2026-07-03 09:00:00,Ana Gomez,15000,
+OPP-013,Enviar Cotizacion,2026-07-04 11:00:00,Ana Gomez,15000,
+OPP-013,Agendar Demo,2026-07-05 09:00:00,Ana Gomez,15000,
+OPP-013,Realizar Demo,2026-07-06 14:00:00,Ana Gomez,15000,
+OPP-013,Enviar Propuesta,2026-07-07 10:00:00,Ana Gomez,15000,
+OPP-013,Negociacion,2026-07-09 15:00:00,Carlos Mendoza,15000,
+OPP-013,Cerrar Perdido,2026-07-09 17:00:00,Carlos Mendoza,15000,No quiere esa marca o calidad
+OPP-014,Crear Lead,2026-07-03 08:30:00,Luis Perez,22000,
+OPP-014,Contactar Cliente,2026-07-03 10:30:00,Luis Perez,22000,
+OPP-014,Calificar Lead,2026-07-04 09:00:00,Luis Perez,22000,
+OPP-014,Enviar Cotizacion,2026-07-05 11:00:00,Luis Perez,22000,
+OPP-014,Prospecto no acepto cotizacion,2026-07-06 14:00:00,Luis Perez,22000,No tiene credito
+OPP-014,Cerrar Perdido,2026-07-06 14:30:00,Luis Perez,22000,No tiene credito
+OPP-015,Crear Lead,2026-07-04 08:00:00,Maria Rodriguez,17000,
+OPP-015,Contactar Cliente,2026-07-04 10:00:00,Maria Rodriguez,17000,
+OPP-015,Calificar Lead,2026-07-05 09:30:00,Maria Rodriguez,17000,
+OPP-015,Enviar Cotizacion,2026-07-06 11:00:00,Maria Rodriguez,17000,
+OPP-015,Agendar Demo,2026-07-07 09:00:00,Maria Rodriguez,17000,
+OPP-015,Realizar Demo,2026-07-08 14:00:00,Maria Rodriguez,17000,
+OPP-015,Enviar Propuesta,2026-07-09 10:00:00,Maria Rodriguez,17000,
+OPP-015,Negociacion,2026-07-11 15:00:00,Elena Silva,17000,
+OPP-015,Cerrar Perdido,2026-07-11 17:00:00,Elena Silva,17000,No hay existencias
+OPP-016,Crear Lead,2026-07-05 09:00:00,Juan Martinez,13000,
+OPP-016,Contactar Cliente,2026-07-05 11:00:00,Juan Martinez,13000,
+OPP-016,Calificar Lead,2026-07-06 10:00:00,Juan Martinez,13000,
+OPP-016,Enviar Cotizacion,2026-07-07 09:00:00,Juan Martinez,13000,
+OPP-016,Prospecto no acepto cotizacion,2026-07-08 15:00:00,Juan Martinez,13000,Mala experiencia anterior con empresa
+OPP-016,Cerrar Perdido,2026-07-08 15:30:00,Juan Martinez,13000,Mala experiencia anterior con empresa
+OPP-017,Crear Lead,2026-07-06 08:00:00,Ana Gomez,20000,
+OPP-017,Contactar Cliente,2026-07-06 10:00:00,Ana Gomez,20000,
+OPP-017,Calificar Lead,2026-07-07 09:00:00,Ana Gomez,20000,
+OPP-017,Enviar Cotizacion,2026-07-08 11:00:00,Ana Gomez,20000,
+OPP-017,Prospecto acepto cotizacion,2026-07-09 10:00:00,Ana Gomez,20000,
+OPP-017,Enviar Propuesta,2026-07-10 09:00:00,Ana Gomez,20000,
+OPP-017,Negociacion,2026-07-12 15:00:00,Carlos Mendoza,20000,
+OPP-017,Cerrar Perdido,2026-07-12 17:00:00,Carlos Mendoza,20000,Precio alto
+OPP-018,Crear Lead,2026-07-07 08:30:00,Luis Perez,30000,
+OPP-018,Contactar Cliente,2026-07-07 10:30:00,Luis Perez,30000,
+OPP-018,Calificar Lead,2026-07-08 09:00:00,Luis Perez,30000,
+OPP-018,Enviar Cotizacion,2026-07-09 11:00:00,Luis Perez,30000,
+OPP-018,Agendar Demo,2026-07-10 09:00:00,Luis Perez,30000,
+OPP-018,Realizar Demo,2026-07-11 14:00:00,Luis Perez,30000,
+OPP-018,Enviar Propuesta,2026-07-12 10:00:00,Luis Perez,30000,
+OPP-018,Negociacion,2026-07-14 15:00:00,Carlos Mendoza,30000,
+OPP-018,Cerrar Ganado,2026-07-16 09:00:00,Carlos Mendoza,30000,
+OPP-019,Crear Lead,2026-07-08 08:00:00,Maria Rodriguez,10000,
+OPP-019,Contactar Cliente,2026-07-08 10:00:00,Maria Rodriguez,10000,
+OPP-019,Calificar Lead,2026-07-09 09:30:00,Maria Rodriguez,10000,
+OPP-019,Enviar Cotizacion,2026-07-10 11:00:00,Maria Rodriguez,10000,
+OPP-019,Prospecto acepto cotizacion,2026-07-11 10:00:00,Maria Rodriguez,10000,
+OPP-019,Enviar Propuesta,2026-07-12 09:00:00,Maria Rodriguez,10000,
+OPP-019,Negociacion,2026-07-14 15:00:00,Elena Silva,10000,
+OPP-019,Cerrar Ganado,2026-07-16 10:00:00,Elena Silva,10000,
+OPP-020,Crear Lead,2026-07-09 08:00:00,Juan Martinez,26000,
+OPP-020,Contactar Cliente,2026-07-09 10:00:00,Juan Martinez,26000,
+OPP-020,Calificar Lead,2026-07-10 09:00:00,Juan Martinez,26000,
+OPP-020,Enviar Cotizacion,2026-07-11 11:00:00,Juan Martinez,26000,
+OPP-020,Agendar Demo,2026-07-12 09:00:00,Juan Martinez,26000,
+OPP-020,Realizar Demo,2026-07-13 14:00:00,Juan Martinez,26000,
+OPP-020,Enviar Propuesta,2026-07-14 10:00:00,Juan Martinez,26000,
+OPP-020,Negociacion,2026-07-16 15:00:00,Carlos Mendoza,26000,
+OPP-020,Cerrar Ganado,2026-07-18 09:00:00,Carlos Mendoza,26000,`;
+
 
 
 function initProcessMining() {
@@ -697,8 +782,9 @@ function renderMiningResult(data) {
   runConformanceChecking(allCaseIds);
 }
 
-// Compute conformance summary - Proceso de Ventas CRM
-// Happy path: Crear Lead → Calificar → Demo → Propuesta → Negociación → Cerrar Ganado
+// Compute conformance - Proceso Real de Ventas CRM
+// Happy path A: Crear Lead → Contactar → Calificar → Cotizacion → Demo → Propuesta → Negociacion → Cerrar Ganado
+// Happy path B: Crear Lead → Contactar → Calificar → Cotizacion → Acepto cotizacion → Propuesta → Negociacion → Cerrar Ganado
 function computeConformanceSummary(caseIds) {
   let happyCases = 0;
   let totalDeviations = 0;
@@ -707,21 +793,21 @@ function computeConformanceSummary(caseIds) {
     const events = parsedCases[caseId] || [];
     const activities = events.map(e => e.activity);
 
-    const hasDemo = activities.includes('Realizar Demo') || activities.includes('Agendar Demo');
+    const hasNoAcepto = activities.includes('Prospecto no acepto cotizacion');
+    const hasCerrarPerdido = activities.includes('Cerrar Perdido');
     const hasCerrarGanado = activities.includes('Cerrar Ganado');
-    const hasEnviarPropuesta = activities.includes('Enviar Propuesta');
-    const hasCalificar = activities.includes('Calificar Lead');
-    const negotiationCount = activities.filter(a => a === 'Negociación').length;
+    const negotiationCount = activities.filter(a => a === 'Negociacion').length;
+    const hasCotizacion = activities.includes('Enviar Cotizacion');
+    const hasPropuesta = activities.includes('Enviar Propuesta');
 
     let caseDeviations = 0;
-    // Desviación 1: Propuesta enviada sin realizar demo
-    if (hasEnviarPropuesta && !hasDemo && hasCerrarGanado) caseDeviations++;
-    // Desviación 2: Contrato grande (>$15k) ganado sin aprobación Legal
-    const amount = events.length > 0 ? (events[0].amount || 0) : 0;
-    if (hasCerrarGanado && amount > 15000 && !activities.includes('Aprobación Legal')) caseDeviations++;
-    // Desviación 3: Propuesta enviada sin calificar el lead
-    if (hasEnviarPropuesta && !hasCalificar) caseDeviations++;
-    // Desviación 4: Bucle de negociación (más de 1 vez)
+    // Desviación 1: Prospecto no acepto cotizacion
+    if (hasNoAcepto) caseDeviations++;
+    // Desviación 2: Perdido en negociación (llegó a negociar pero se perdió)
+    if (hasCerrarPerdido && !hasNoAcepto) caseDeviations++;
+    // Desviación 3: Propuesta enviada sin cotización previa
+    if (hasPropuesta && !hasCotizacion) caseDeviations++;
+    // Desviación 4: Bucle de negociación (negociación repetida)
     if (negotiationCount > 1) caseDeviations++;
 
     if (caseDeviations === 0) happyCases++;
@@ -732,6 +818,7 @@ function computeConformanceSummary(caseIds) {
   const conformancePercent = Math.round((happyCases / total) * 100 * 10) / 10;
   return { conformancePercent, totalDeviations };
 }
+
 
 
 
