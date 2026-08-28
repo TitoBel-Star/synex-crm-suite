@@ -15,90 +15,90 @@ let allActiveCasesBeforeDeviationFilter = new Set();
 
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000/api/v1' : '/api/v1';
 
-// Fallback CSV Data to load if backend is starting up or offline
-const FALLBACK_CRM_CSV = `case_id,activity,timestamp,resource,amount,lost_reason
-OPP-1001,Crear Lead,2026-07-01 09:00:00,Ana Gomez,15000,
-OPP-1001,Contactar Cliente,2026-07-01 10:30:00,Ana Gomez,15000,
-OPP-1001,Calificar Lead,2026-07-02 14:00:00,Ana Gomez,15000,
-OPP-1001,Enviar Propuesta,2026-07-03 11:00:00,Ana Gomez,15000,
-OPP-1001,Negociación,2026-07-04 16:30:00,Carlos Mendoza,15000,
-OPP-1001,Cerrar Ganado,2026-07-06 10:00:00,Carlos Mendoza,15000,
-OPP-1002,Crear Lead,2026-07-01 09:15:00,Luis Perez,25000,
-OPP-1002,Contactar Cliente,2026-07-01 11:00:00,Luis Perez,25000,
-OPP-1002,Cerrar Perdido,2026-07-02 15:30:00,Luis Perez,25000,Precio muy alto
-OPP-1003,Crear Lead,2026-07-01 09:30:00,Maria Rodriguez,8000,
-OPP-1003,Contactar Cliente,2026-07-01 12:00:00,Maria Rodriguez,8000,
-OPP-1003,Calificar Lead,2026-07-02 16:00:00,Maria Rodriguez,8000,
-OPP-1003,Agendar Demo,2026-07-03 09:30:00,Maria Rodriguez,8000,
-OPP-1003,Realizar Demo,2026-07-04 14:00:00,Maria Rodriguez,8000,
-OPP-1003,Enviar Propuesta,2026-07-05 10:30:00,Maria Rodriguez,8000,
-OPP-1003,Negociación,2026-07-06 15:00:00,Elena Silva,8000,
-OPP-1003,Cerrar Ganado,2026-07-08 11:30:00,Elena Silva,8000,
-OPP-1004,Crear Lead,2026-07-01 10:00:00,Juan Martinez,18000,
-OPP-1004,Contactar Cliente,2026-07-01 14:30:00,Juan Martinez,18000,
-OPP-1004,Calificar Lead,2026-07-02 11:00:00,Juan Martinez,18000,
-OPP-1004,Enviar Propuesta,2026-07-03 15:30:00,Juan Martinez,18000,
-OPP-1004,Negociación,2026-07-04 10:00:00,Carlos Mendoza,18000,
-OPP-1004,Cerrar Ganado,2026-07-06 09:30:00,Carlos Mendoza,18000,
-OPP-1005,Crear Lead,2026-07-02 09:00:00,Ana Gomez,12000,
-OPP-1005,Contactar Cliente,2026-07-02 11:30:00,Ana Gomez,12000,
-OPP-1005,Calificar Lead,2026-07-03 14:00:00,Ana Gomez,12000,
-OPP-1005,Enviar Propuesta,2026-07-04 10:30:00,Ana Gomez,12000,
-OPP-1005,Cerrar Perdido,2026-07-05 16:00:00,Ana Gomez,12000,La calidad no le gusta al cliente
-OPP-1006,Crear Lead,2026-07-02 10:00:00,Luis Perez,35000,
-OPP-1006,Contactar Cliente,2026-07-02 15:00:00,Luis Perez,35000,
-OPP-1006,Calificar Lead,2026-07-03 11:30:00,Luis Perez,35000,
-OPP-1006,Agendar Demo,2026-07-04 09:00:00,Luis Perez,35000,
-OPP-1006,Realizar Demo,2026-07-05 14:00:00,Luis Perez,35000,
-OPP-1006,Enviar Propuesta,2026-07-06 10:30:00,Luis Perez,35000,
-OPP-1006,Negociación,2026-07-07 15:00:00,Carlos Mendoza,35000,
-OPP-1006,Aprobación Legal,2026-07-08 11:00:00,Abog. Ruiz,35000,
-OPP-1006,Cerrar Ganado,2026-07-10 16:30:00,Carlos Mendoza,35000,
-OPP-1007,Crear Lead,2026-07-03 09:00:00,Maria Rodriguez,16000,
-OPP-1007,Contactar Cliente,2026-07-03 11:00:00,Maria Rodriguez,16000,
-OPP-1007,Calificar Lead,2026-07-04 14:30:00,Maria Rodriguez,16000,
-OPP-1007,Enviar Propuesta,2026-07-05 10:00:00,Maria Rodriguez,16000,
-OPP-1007,Negociación,2026-07-06 15:30:00,Elena Silva,16000,
-OPP-1007,Cerrar Ganado,2026-07-08 09:00:00,Elena Silva,16000,
-OPP-1008,Crear Lead,2026-07-03 10:30:00,Juan Martinez,5000,
-OPP-1008,Contactar Cliente,2026-07-03 14:00:00,Juan Martinez,5000,
-OPP-1008,Cerrar Perdido,2026-07-04 16:00:00,Juan Martinez,5000,Sin presupuesto / Proyecto cancelado
-OPP-1009,Crear Lead,2026-07-04 09:00:00,Ana Gomez,22000,
-OPP-1009,Contactar Cliente,2026-07-04 11:30:00,Ana Gomez,22000,
-OPP-1009,Calificar Lead,2026-07-05 14:00:00,Ana Gomez,22000,
-OPP-1009,Enviar Propuesta,2026-07-06 10:30:00,Ana Gomez,22000,
-OPP-1009,Cerrar Perdido,2026-07-07 16:00:00,Ana Gomez,22000,No tiene credito con la empresa
-OPP-1010,Crear Lead,2026-07-04 10:00:00,Luis Perez,14000,
-OPP-1010,Contactar Cliente,2026-07-04 15:00:00,Luis Perez,14000,
-OPP-1010,Cerrar Perdido,2026-07-05 16:30:00,Luis Perez,14000,No tenemos el producto (sin existencias)
-OPP-1011,Crear Lead,2026-07-05 09:30:00,Maria Rodriguez,9000,
-OPP-1011,Contactar Cliente,2026-07-05 12:00:00,Maria Rodriguez,9000,
-OPP-1011,Cerrar Perdido,2026-07-06 15:30:00,Maria Rodriguez,9000,Percibe mal servicio de parte de empresa
-OPP-1012,Crear Lead,2026-07-05 10:00:00,Juan Martinez,30000,
-OPP-1012,Contactar Cliente,2026-07-05 14:30:00,Juan Martinez,30000,
-OPP-1012,Calificar Lead,2026-07-06 11:00:00,Juan Martinez,30000,
-OPP-1012,Enviar Propuesta,2026-07-07 15:30:00,Juan Martinez,30000,
-OPP-1012,Negociación,2026-07-08 10:00:00,Carlos Mendoza,30000,
-OPP-1012,Cerrar Ganado,2026-07-10 09:30:00,Carlos Mendoza,30000,
-OPP-1013,Crear Lead,2026-07-06 09:00:00,Ana Gomez,19000,
-OPP-1013,Contactar Cliente,2026-07-06 11:30:00,Ana Gomez,19000,
-OPP-1013,Calificar Lead,2026-07-07 14:00:00,Ana Gomez,19000,
-OPP-1013,Enviar Propuesta,2026-07-08 10:30:00,Ana Gomez,19000,
-OPP-1013,Negociación,2026-07-09 15:00:00,Elena Silva,19000,
-OPP-1013,Aprobación Legal,2026-07-10 11:00:00,Abog. Castro,19000,
-OPP-1013,Cerrar Ganado,2026-07-12 16:30:00,Elena Silva,19000,
-OPP-1014,Crear Lead,2026-07-06 10:00:00,Luis Perez,15000,
-OPP-1014,Contactar Cliente,2026-07-06 15:00:00,Luis Perez,15000,
-OPP-1014,Calificar Lead,2026-07-07 11:30:00,Luis Perez,15000,
-OPP-1014,Enviar Propuesta,2026-07-08 10:30:00,Luis Perez,15000,
-OPP-1014,Negociación,2026-07-09 15:00:00,Carlos Mendoza,15000,
-OPP-1014,Cerrar Ganado,2026-07-11 16:30:00,Carlos Mendoza,15000,
-OPP-1015,Crear Lead,2026-07-07 09:00:00,Maria Rodriguez,12000,
-OPP-1015,Contactar Cliente,2026-07-07 11:00:00,Maria Rodriguez,12000,
-OPP-1015,Calificar Lead,2026-07-08 14:30:00,Maria Rodriguez,12000,
-OPP-1015,Enviar Propuesta,2026-07-09 10:00:00,Maria Rodriguez,12000,
-OPP-1015,Negociación,2026-07-10 15:30:00,Elena Silva,12000,
-OPP-1015,Cerrar Ganado,2026-07-12 09:00:00,Elena Silva,12000,`;
+// Fallback CSV Data - Proceso Logístico ROP (Órdenes de Envío)
+const FALLBACK_CRM_CSV = `case_id,activity,timestamp,resource,amount,sucursal,proveedor
+ORD-001,Pendiente,2026-07-01 08:00:00,Ana Gomez,45000,Sucursal Central,Proveedor ABC
+ORD-001,Colocado 1er Envio,2026-07-01 09:30:00,Ana Gomez,45000,Sucursal Central,Proveedor ABC
+ORD-001,Autorizado 1er Envio,2026-07-02 10:00:00,Carlos Mendoza,45000,Sucursal Central,Proveedor ABC
+ORD-001,Enviado 2do Envio,2026-07-04 08:30:00,Carlos Mendoza,45000,Sucursal Central,Proveedor ABC
+ORD-001,Recibido en Bodega,2026-07-07 14:00:00,Luis Perez,45000,Sucursal Central,Proveedor ABC
+ORD-002,Pendiente,2026-07-01 08:15:00,Ana Gomez,32000,Sucursal Norte,Proveedor XYZ
+ORD-002,Colocado 1er Envio,2026-07-01 10:00:00,Ana Gomez,32000,Sucursal Norte,Proveedor XYZ
+ORD-002,Autorizado 1er Envio,2026-07-02 11:00:00,Carlos Mendoza,32000,Sucursal Norte,Proveedor XYZ
+ORD-002,Enviado 2do Envio,2026-07-04 09:00:00,Carlos Mendoza,32000,Sucursal Norte,Proveedor XYZ
+ORD-002,Recibido en Bodega,2026-07-07 15:30:00,Luis Perez,32000,Sucursal Norte,Proveedor XYZ
+ORD-003,Pendiente,2026-07-01 08:30:00,Maria Rodriguez,28000,Sucursal Sur,Proveedor ABC
+ORD-003,Colocado 1er Envio,2026-07-01 10:30:00,Maria Rodriguez,28000,Sucursal Sur,Proveedor ABC
+ORD-003,Rechazado Proveedor,2026-07-03 14:00:00,Maria Rodriguez,28000,Sucursal Sur,Proveedor ABC
+ORD-004,Pendiente,2026-07-01 09:00:00,Juan Martinez,52000,Sucursal Central,Proveedor DEF
+ORD-004,Cancelado Directo,2026-07-01 11:00:00,Juan Martinez,52000,Sucursal Central,Proveedor DEF
+ORD-005,Pendiente,2026-07-02 08:00:00,Ana Gomez,38000,Sucursal Norte,Proveedor ABC
+ORD-005,Colocado 1er Envio,2026-07-02 09:30:00,Ana Gomez,38000,Sucursal Norte,Proveedor ABC
+ORD-005,Autorizado 1er Envio,2026-07-03 10:00:00,Carlos Mendoza,38000,Sucursal Norte,Proveedor ABC
+ORD-005,Enviado 2do Envio,2026-07-05 08:30:00,Carlos Mendoza,38000,Sucursal Norte,Proveedor ABC
+ORD-005,Recibido en Bodega,2026-07-08 14:00:00,Luis Perez,38000,Sucursal Norte,Proveedor ABC
+ORD-006,Pendiente,2026-07-02 08:30:00,Maria Rodriguez,21000,Sucursal Sur,Proveedor XYZ
+ORD-006,Colocado 1er Envio,2026-07-02 10:00:00,Maria Rodriguez,21000,Sucursal Sur,Proveedor XYZ
+ORD-006,Autorizado 1er Envio,2026-07-03 11:00:00,Carlos Mendoza,21000,Sucursal Sur,Proveedor XYZ
+ORD-006,Retraso Logistico,2026-07-06 14:00:00,Carlos Mendoza,21000,Sucursal Sur,Proveedor XYZ
+ORD-006,Recibido en Bodega,2026-07-10 10:00:00,Luis Perez,21000,Sucursal Sur,Proveedor XYZ
+ORD-007,Pendiente,2026-07-02 09:00:00,Juan Martinez,61000,Sucursal Central,Proveedor ABC
+ORD-007,Colocado 1er Envio,2026-07-02 11:00:00,Juan Martinez,61000,Sucursal Central,Proveedor ABC
+ORD-007,Devolucion por Errores,2026-07-04 09:00:00,Juan Martinez,61000,Sucursal Central,Proveedor ABC
+ORD-008,Pendiente,2026-07-03 08:00:00,Ana Gomez,44000,Sucursal Norte,Proveedor DEF
+ORD-008,Colocado 1er Envio,2026-07-03 09:30:00,Ana Gomez,44000,Sucursal Norte,Proveedor DEF
+ORD-008,Autorizado 1er Envio,2026-07-04 10:00:00,Carlos Mendoza,44000,Sucursal Norte,Proveedor DEF
+ORD-008,Enviado 2do Envio,2026-07-06 08:30:00,Carlos Mendoza,44000,Sucursal Norte,Proveedor DEF
+ORD-008,Recibido en Bodega,2026-07-09 14:00:00,Luis Perez,44000,Sucursal Norte,Proveedor DEF
+ORD-009,Pendiente,2026-07-03 08:30:00,Maria Rodriguez,33000,Sucursal Sur,Proveedor XYZ
+ORD-009,Colocado 1er Envio,2026-07-03 10:00:00,Maria Rodriguez,33000,Sucursal Sur,Proveedor XYZ
+ORD-009,Autorizado 1er Envio,2026-07-04 11:00:00,Carlos Mendoza,33000,Sucursal Sur,Proveedor XYZ
+ORD-009,Enviado 2do Envio,2026-07-06 09:00:00,Carlos Mendoza,33000,Sucursal Sur,Proveedor XYZ
+ORD-009,Recibido en Bodega,2026-07-09 15:30:00,Luis Perez,33000,Sucursal Sur,Proveedor XYZ
+ORD-010,Pendiente,2026-07-03 09:00:00,Juan Martinez,29000,Sucursal Central,Proveedor ABC
+ORD-010,Cancelado Directo,2026-07-03 11:30:00,Juan Martinez,29000,Sucursal Central,Proveedor ABC
+ORD-011,Pendiente,2026-07-04 08:00:00,Ana Gomez,57000,Sucursal Norte,Proveedor ABC
+ORD-011,Colocado 1er Envio,2026-07-04 09:30:00,Ana Gomez,57000,Sucursal Norte,Proveedor ABC
+ORD-011,Autorizado 1er Envio,2026-07-05 10:00:00,Carlos Mendoza,57000,Sucursal Norte,Proveedor ABC
+ORD-011,Enviado 2do Envio,2026-07-07 08:30:00,Carlos Mendoza,57000,Sucursal Norte,Proveedor ABC
+ORD-011,Recibido en Bodega,2026-07-10 14:00:00,Luis Perez,57000,Sucursal Norte,Proveedor ABC
+ORD-012,Pendiente,2026-07-04 08:30:00,Maria Rodriguez,41000,Sucursal Central,Proveedor DEF
+ORD-012,Colocado 1er Envio,2026-07-04 10:00:00,Maria Rodriguez,41000,Sucursal Central,Proveedor DEF
+ORD-012,Rechazado Proveedor,2026-07-06 15:00:00,Maria Rodriguez,41000,Sucursal Central,Proveedor DEF
+ORD-013,Pendiente,2026-07-05 08:00:00,Juan Martinez,36000,Sucursal Sur,Proveedor XYZ
+ORD-013,Colocado 1er Envio,2026-07-05 09:30:00,Juan Martinez,36000,Sucursal Sur,Proveedor XYZ
+ORD-013,Autorizado 1er Envio,2026-07-06 10:00:00,Carlos Mendoza,36000,Sucursal Sur,Proveedor XYZ
+ORD-013,Enviado 2do Envio,2026-07-08 08:30:00,Carlos Mendoza,36000,Sucursal Sur,Proveedor XYZ
+ORD-013,Recibido en Bodega,2026-07-11 14:00:00,Luis Perez,36000,Sucursal Sur,Proveedor XYZ
+ORD-014,Pendiente,2026-07-05 08:30:00,Ana Gomez,48000,Sucursal Central,Proveedor ABC
+ORD-014,Colocado 1er Envio,2026-07-05 10:00:00,Ana Gomez,48000,Sucursal Central,Proveedor ABC
+ORD-014,Autorizado 1er Envio,2026-07-06 11:00:00,Carlos Mendoza,48000,Sucursal Central,Proveedor ABC
+ORD-014,Retraso Logistico,2026-07-09 14:00:00,Carlos Mendoza,48000,Sucursal Central,Proveedor ABC
+ORD-014,Recibido en Bodega,2026-07-13 10:00:00,Luis Perez,48000,Sucursal Central,Proveedor ABC
+ORD-015,Pendiente,2026-07-06 08:00:00,Maria Rodriguez,25000,Sucursal Norte,Proveedor DEF
+ORD-015,Colocado 1er Envio,2026-07-06 09:30:00,Maria Rodriguez,25000,Sucursal Norte,Proveedor DEF
+ORD-015,Devolucion por Errores,2026-07-08 10:00:00,Maria Rodriguez,25000,Sucursal Norte,Proveedor DEF
+ORD-016,Pendiente,2026-07-06 08:30:00,Juan Martinez,53000,Sucursal Sur,Proveedor ABC
+ORD-016,Colocado 1er Envio,2026-07-06 10:00:00,Juan Martinez,53000,Sucursal Sur,Proveedor ABC
+ORD-016,Autorizado 1er Envio,2026-07-07 10:00:00,Carlos Mendoza,53000,Sucursal Sur,Proveedor ABC
+ORD-016,Enviado 2do Envio,2026-07-09 08:30:00,Carlos Mendoza,53000,Sucursal Sur,Proveedor ABC
+ORD-016,Recibido en Bodega,2026-07-12 14:00:00,Luis Perez,53000,Sucursal Sur,Proveedor ABC
+ORD-017,Pendiente,2026-07-07 08:00:00,Ana Gomez,39000,Sucursal Central,Proveedor XYZ
+ORD-017,Colocado 1er Envio,2026-07-07 09:30:00,Ana Gomez,39000,Sucursal Central,Proveedor XYZ
+ORD-017,Autorizado 1er Envio,2026-07-08 10:00:00,Carlos Mendoza,39000,Sucursal Central,Proveedor XYZ
+ORD-017,Enviado 2do Envio,2026-07-10 08:30:00,Carlos Mendoza,39000,Sucursal Central,Proveedor XYZ
+ORD-017,Recibido en Bodega,2026-07-13 14:00:00,Luis Perez,39000,Sucursal Central,Proveedor XYZ
+ORD-018,Pendiente,2026-07-07 08:30:00,Maria Rodriguez,66000,Sucursal Norte,Proveedor ABC
+ORD-018,Cancelado Directo,2026-07-07 12:00:00,Maria Rodriguez,66000,Sucursal Norte,Proveedor ABC
+ORD-019,Pendiente,2026-07-08 08:00:00,Juan Martinez,42000,Sucursal Sur,Proveedor DEF
+ORD-019,Colocado 1er Envio,2026-07-08 09:30:00,Juan Martinez,42000,Sucursal Sur,Proveedor DEF
+ORD-019,Autorizado 1er Envio,2026-07-09 10:00:00,Carlos Mendoza,42000,Sucursal Sur,Proveedor DEF
+ORD-019,Enviado 2do Envio,2026-07-11 08:30:00,Carlos Mendoza,42000,Sucursal Sur,Proveedor DEF
+ORD-019,Recibido en Bodega,2026-07-14 14:00:00,Luis Perez,42000,Sucursal Sur,Proveedor DEF
+ORD-020,Pendiente,2026-07-08 08:30:00,Ana Gomez,31000,Sucursal Central,Proveedor XYZ
+ORD-020,Colocado 1er Envio,2026-07-08 10:00:00,Ana Gomez,31000,Sucursal Central,Proveedor XYZ
+ORD-020,Rechazado Proveedor,2026-07-10 16:00:00,Ana Gomez,31000,Sucursal Central,Proveedor XYZ`;
+
 
 function initProcessMining() {
   console.log('[Process Mining] Module loading...');
@@ -696,7 +696,8 @@ function renderMiningResult(data) {
   runConformanceChecking(allCaseIds);
 }
 
-// Compute conformance summary: percentage of cases following happy path + total deviations
+// Compute conformance summary for ROP Logistics process
+// Happy path: Pendiente → Colocado 1er Envio → Autorizado 1er Envio → Enviado 2do Envio → Recibido en Bodega
 function computeConformanceSummary(caseIds) {
   let happyCases = 0;
   let totalDeviations = 0;
@@ -705,19 +706,20 @@ function computeConformanceSummary(caseIds) {
     const events = parsedCases[caseId] || [];
     const activities = events.map(e => e.activity);
 
-    const hasDemo = activities.includes('Realizar Demo') || activities.includes('Agendar Demo');
-    const hasCerrarGanado = activities.includes('Cerrar Ganado');
-    const hasEnviarPropuesta = activities.includes('Enviar Propuesta');
-    const hasCalificar = activities.includes('Calificar Lead');
+    // Deviation 1: Cancelado Directo (orden cancelada sin procesarse)
+    const hasCanceladoDirecto = activities.includes('Cancelado Directo');
+    // Deviation 2: Rechazado por el proveedor
+    const hasRechazadoProveedor = activities.includes('Rechazado Proveedor');
+    // Deviation 3: Devolución por errores en el envío
+    const hasDevolucion = activities.includes('Devolucion por Errores');
+    // Deviation 4: Retraso logístico (cuello de botella)
+    const hasRetrasoLogistico = activities.includes('Retraso Logistico');
 
     let caseDeviations = 0;
-    // Deviation 1: Propuesta sin demo
-    if (hasEnviarPropuesta && !hasDemo && hasCerrarGanado) caseDeviations++;
-    // Deviation 2: Ganado >15k sin Legal
-    const amount = events.length > 0 ? (events[0].amount || 0) : 0;
-    if (hasCerrarGanado && amount > 15000 && !activities.includes('Aprobación Legal')) caseDeviations++;
-    // Deviation 3: Propuesta sin calificar
-    if (hasEnviarPropuesta && !hasCalificar) caseDeviations++;
+    if (hasCanceladoDirecto) caseDeviations++;
+    if (hasRechazadoProveedor) caseDeviations++;
+    if (hasDevolucion) caseDeviations++;
+    if (hasRetrasoLogistico) caseDeviations++;
 
     if (caseDeviations === 0) happyCases++;
     totalDeviations += caseDeviations;
@@ -727,6 +729,7 @@ function computeConformanceSummary(caseIds) {
   const conformancePercent = Math.round((happyCases / total) * 100 * 10) / 10;
   return { conformancePercent, totalDeviations };
 }
+
 
 function parseCsvData(csv) {
 
@@ -1012,15 +1015,14 @@ function populateResourceFilter() {
 // =============================================================================
 
 function runConformanceChecking(filteredCaseIds) {
-  // Store all active cases currently matching date/salesperson filters
   allActiveCasesBeforeDeviationFilter = new Set(filteredCaseIds);
-  
-  // Clear previous deviation mappings
+
+  // Clear previous deviation mappings (reuse keys: demo=cancelado, legal=rechazado, qualification=devolucion, rework=retraso)
   activeDeviationCases = {
-    demo: new Set(),
-    legal: new Set(),
-    qualification: new Set(),
-    rework: new Set()
+    demo: new Set(),         // Cancelado Directo
+    legal: new Set(),        // Rechazado Proveedor
+    qualification: new Set(), // Devolucion por Errores
+    rework: new Set()        // Retraso Logistico
   };
 
   const caseIdsArr = Array.from(filteredCaseIds);
@@ -1028,49 +1030,38 @@ function runConformanceChecking(filteredCaseIds) {
 
   caseIdsArr.forEach(caseId => {
     const events = parsedCases[caseId] || [];
-    
-    // Check if case has certain activities
     const activities = events.map(e => e.activity);
-    const hasProposal = activities.includes('Enviar Propuesta');
-    const hasDemo = activities.includes('Realizar Demo');
-    const hasLegal = activities.includes('Aprobación Legal');
-    const hasQualification = activities.includes('Calificar Lead');
-    const isWon = activities.includes('Cerrar Ganado');
-    
-    // Find max amount in case events
-    const maxAmount = Math.max(...events.map(e => e.amount || 0), 0);
 
     let hasAnyDeviation = false;
 
-    // Rule 1: Omisión de Demo (Proposal sent but no Demo performed)
-    if (hasProposal && !hasDemo) {
+    // Rule 1: Cancelado Directo
+    if (activities.includes('Cancelado Directo')) {
       activeDeviationCases.demo.add(caseId);
       hasAnyDeviation = true;
     }
 
-    // Rule 2: Contrato Grande sin Legal (Won contract > $15,000 USD but no Legal approval)
-    if (isWon && maxAmount > 15000 && !hasLegal) {
+    // Rule 2: Rechazado Proveedor
+    if (activities.includes('Rechazado Proveedor')) {
       activeDeviationCases.legal.add(caseId);
       hasAnyDeviation = true;
     }
 
-    // Rule 3: Salto de Calificación (Proposal sent but no Qualification performed)
-    if (hasProposal && !hasQualification) {
+    // Rule 3: Devolucion por Errores
+    if (activities.includes('Devolucion por Errores')) {
       activeDeviationCases.qualification.add(caseId);
       hasAnyDeviation = true;
     }
 
-    // Rule 4: Bucle de Retrabajo en Negociación (Negotiation activity occurs more than once)
-    const negotiationCount = activities.filter(act => act === 'Negociación').length;
-    if (negotiationCount > 1) {
+    // Rule 4: Retraso Logistico (cuello de botella)
+    if (activities.includes('Retraso Logistico')) {
       activeDeviationCases.rework.add(caseId);
       hasAnyDeviation = true;
     }
 
-    if (!hasAnyDeviation) {
-      conformantCount++;
-    }
+    if (!hasAnyDeviation) conformantCount++;
   });
+
+
 
   // Calculate conformity score
   const totalCases = caseIdsArr.length;
